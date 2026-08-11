@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Scientist Skills Explorer</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;   /* profile */
+    --series-2: #eb6834;   /* comparison overlay */
+    --c-analytical: #2a78d6;
+    --c-aiera: #eb6834;
+    --c-eng: #1baf7a;
+    --c-human: #eda100;
+    --badge-bg: rgba(235,104,52,0.14);
+    --badge-fg: #a63c14;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --c-analytical: #3987e5;
+      --c-aiera: #d95926;
+      --c-eng: #199e70;
+      --c-human: #c98500;
+      --badge-bg: rgba(217,89,38,0.22);
+      --badge-fg: #f0a184;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body.viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { color: var(--text-secondary); font-size: 13.5px; margin-top: 4px; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin: 16px 0;
+  }
+  .toolbar label { font-size: 12.5px; color: var(--text-secondary); }
+  select, button, input[type="text"] {
+    font: inherit; font-size: 13.5px;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--text-muted); }
+  input[type="text"] { min-width: 220px; }
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .cluster { margin-bottom: 14px; }
+  .cluster h3 {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 7px; margin-bottom: 8px;
+  }
+  .cluster h3 .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .skill-row { display: grid; grid-template-columns: 1fr 120px 26px; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .skill-row .name { font-size: 13px; }
+  .skill-row .val { font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .badge {
+    display: inline-block; font-size: 9.5px; font-weight: 700;
+    background: var(--badge-bg); color: var(--badge-fg);
+    border-radius: 7px; padding: 1px 6px; margin-left: 5px; vertical-align: 1px;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--series-1); }
+  .chart-panel { position: relative; }
+  #chart { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 18px; justify-content: center; font-size: 13px; color: var(--text-secondary); padding: 6px 0 2px; }
+  .legend .key { display: inline-flex; align-items: center; gap: 7px; }
+  .legend .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .tooltip {
+    position: absolute; pointer-events: none; display: none;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; font-size: 12.5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12); z-index: 5; white-space: nowrap;
+  }
+  .tooltip .t-name { font-weight: 600; }
+  .tooltip .t-val { color: var(--text-secondary); }
+  .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Data Scientist Skills Explorer</h1>
+    <p>2026 skills inventory &mdash; drag the sliders to sketch a data scientist&rsquo;s portrait. Scale 0&ndash;4 per skill.</p>
+  </header>
+
+  <div class="toolbar">
+    <label>Portrait
+      <input type="text" id="portraitName" value="Data Scientist" aria-label="Portrait name">
+    </label>
+    <label>Preset
+      <select id="preset" aria-label="Load preset"></select>
+    </label>
+    <label>Compare with
+      <select id="compare" aria-label="Comparison overlay"></select>
+    </label>
+    <button id="downloadSvg">Download SVG</button>
+    <button id="downloadPng">Download PNG</button>
+    <button id="copyValues">Copy values</button>
+  </div>
+
+  <div class="layout">
+    <div class="panel" id="sliders"></div>
+    <div class="panel chart-panel">
+      <svg id="chart" viewBox="0 0 1120 700" role="img" aria-label="Radar chart of skill levels"></svg>
+      <div class="legend" id="legend"></div>
+      <div class="tooltip" id="tooltip"></div>
+      <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Values are also listed beside each slider.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------- data ----------------
+const CLUSTERS = [
+  { name: "Analytical core", varName: "--c-analytical" },
+  { name: "AI",              varName: "--c-aiera" },
+  { name: "Engineering",     varName: "--c-eng" },
+  { name: "Human interface", varName: "--c-human" },
+];
+const SKILLS = [ // order = clockwise from top
+  { id: "stats",   label: "Statistics & Modeling",   cluster: 0, isNew: false },
+  { id: "aifound", label: "AI Foundations",           cluster: 1, isNew: false }, // absorbs the old ML/DL axis; evaluation lives in its rungs
+  { id: "agents",  label: "AI Agents & Frameworks",   cluster: 1, isNew: true },
+  { id: "prog",    label: "Programming",              cluster: 2, isNew: false },
+  { id: "dataeng", label: "Data Engineering",         cluster: 2, isNew: false }, // absorbs SQL & data access
+  { id: "viz",     label: "Visualization",            cluster: 3, isNew: false },
+  { id: "comm",    label: "Communication",            cluster: 3, isNew: false },
+  { id: "story",   label: "Storytelling",             cluster: 3, isNew: false },
+  { id: "domain",  label: "Domain Knowledge",         cluster: 3, isNew: false },
+];
+// preset values follow SKILLS order:
+// [stats, aifound, agents, prog, dataeng, viz, comm, story, domain]
+const PRESETS = {
+  "Custom":          null,
+  "Balanced 2026 DS":[3, 3, 3, 2, 2, 3, 3, 3, 2],
+  "The Guide":       [2, 2, 3, 1, 1, 4, 4, 4, 2],
+  "The Builder":     [3, 2, 3, 3, 3, 2, 2, 3, 2],
+  "The Architect":   [2, 3, 3, 4, 4, 2, 2, 2, 3],
+  "The Visionary":   [3, 4, 4, 2, 2, 2, 3, 3, 4],
+  "The Toolmaker":   [2, 4, 4, 3, 2, 2, 2, 1, 2],
+};
+const N = SKILLS.length, CX = 545, CY = 360, R = 235, MAXV = 4;
+let values = PRESETS["Balanced 2026 DS"].slice();
+
+// ---------------- helpers ----------------
+const svgNS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.body).getPropertyValue(v).trim();
+const angle = i => -Math.PI / 2 + 2 * Math.PI * i / N;
+const pt = (i, r) => [CX + r * Math.cos(angle(i)), CY + r * Math.sin(angle(i))];
+const el = (tag, attrs, parent) => {
+  const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+
+// ---------------- sliders ----------------
+const slidersHost = document.getElementById("sliders");
+function buildSliders() {
+  CLUSTERS.forEach((c, ci) => {
+    const div = document.createElement("div");
+    div.className = "cluster";
+    const h = document.createElement("h3");
+    h.innerHTML = `<span class="dot" style="background:var(${c.varName})"></span>${c.name}`;
+    div.appendChild(h);
+    SKILLS.forEach((s, si) => {
+      if (s.cluster !== ci) return;
+      const row = document.createElement("div");
+      row.className = "skill-row";
+      row.innerHTML =
+        `<span class="name">${s.label}${s.isNew ? '<span class="badge">NEW</span>' : ''}</span>` +
+        `<input type="range" min="0" max="4" step="0.5" value="${values[si]}" data-idx="${si}" aria-label="${s.label}">` +
+        `<span class="val" id="val-${si}">${values[si]}</span>`;
+      div.appendChild(row);
+    });
+    slidersHost.appendChild(div);
+  });
+  slidersHost.addEventListener("input", e => {
+    if (e.target.type !== "range") return;
+    const i = +e.target.dataset.idx;
+    values[i] = +e.target.value;
+    document.getElementById("val-" + i).textContent = values[i];
+    document.getElementById("preset").value = "Custom";
+    draw();
+  });
+}
+
+// ---------------- chart ----------------
+const svg = document.getElementById("chart");
+let compareValues = null;
+
+function draw() {
+  svg.innerHTML = "";
+  // title inside the SVG (so exports carry it)
+  el("text", { x: CX, y: 42, "text-anchor": "middle", "font-size": 30, "font-weight": 700,
+               fill: css("--text-primary"), "font-family": "system-ui, sans-serif" }, svg)
+    .textContent = document.getElementById("portraitName").value || "Data Scientist";
+
+  // rings
+  for (let v = 1; v <= MAXV; v++) {
+    el("circle", { cx: CX, cy: CY, r: R * v / MAXV, fill: "none",
+                   stroke: v === MAXV ? css("--axis") : css("--grid"), "stroke-width": 1 }, svg);
+    el("text", { x: CX + 12, y: CY - R * v / MAXV + 5, "font-size": 13,
+                 fill: css("--text-muted"), "font-family": "system-ui, sans-serif" }, svg).textContent = v;
+  }
+  // axes
+  for (let i = 0; i < N; i++) {
+    const [x, y] = pt(i, R);
+    el("line", { x1: CX, y1: CY, x2: x, y2: y, stroke: css("--grid"), "stroke-width": 1 }, svg);
+  }
+  // comparison overlay (drawn first, under the main profile)
+  if (compareValues) {
+    const pts = compareValues.map((v, i) => pt(i, R * v / MAXV).join(",")).join(" ");
+    el("polygon", { points: pts, fill: "none", stroke: css("--series-2"),
+                    "stroke-width": 2, "stroke-dasharray": "6 5", "stroke-linejoin": "round" }, svg);
+  }
+  // main profile
+  const pts = values.map((v, i) => pt(i, R * v / MAXV).join(",")).join(" ");
+  el("polygon", { points: pts, fill: css("--series-1"), "fill-opacity": 0.22,
+                  stroke: css("--series-1"), "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+  // vertex dots + invisible hover targets
+  values.forEach((v, i) => {
+    const [x, y] = pt(i, R * v / MAXV);
+    el("circle", { cx: x, cy: y, r: 4, fill: css("--series-1") }, svg);
+    const hit = el("circle", { cx: x, cy: y, r: 14, fill: "transparent", "data-idx": i }, svg);
+    hit.addEventListener("mousemove", ev => showTip(ev, i));
+    hit.addEventListener("mouseleave", hideTip);
+  });
+  // axis labels
+  SKILLS.forEach((s, i) => {
+    const a = angle(i), c = Math.cos(a), sn = Math.sin(a);
+    const lx = CX + (R + 30) * c, ly = CY + (R + 30) * sn;
+    let anchor = "middle";
+    if (c > 0.35) anchor = "start";
+    if (c < -0.35) anchor = "end";
+    let dy = 7;
+    if (sn < -0.85) dy = 0;
+    if (sn > 0.85) dy = 16;
+    const t = el("text", { x: lx, y: ly + dy, "text-anchor": anchor, "font-size": 20, "font-weight": 600,
+                           fill: css("--text-primary"), "font-family": "system-ui, sans-serif",
+                           "data-idx": i, style: "cursor:default" }, svg);
+    t.textContent = s.label + (s.isNew ? " •" : "");
+    if (s.isNew) t.setAttribute("fill", css("--text-primary"));
+    t.addEventListener("mousemove", ev => showTip(ev, i));
+    t.addEventListener("mouseleave", hideTip);
+  });
+  drawLegend();
+}
+
+function drawLegend() {
+  const lg = document.getElementById("legend");
+  const compareName = document.getElementById("compare").value;
+  let html = `<span class="key"><span class="swatch" style="background:var(--series-1)"></span>` +
+             `${document.getElementById("portraitName").value || "Data Scientist"}</span>`;
+  if (compareValues) {
+    html += `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${compareName}</span>`;
+  }
+  lg.innerHTML = html;
+}
+
+// ---------------- tooltip ----------------
+const tip = document.getElementById("tooltip");
+function showTip(ev, i) {
+  const host = svg.parentElement.getBoundingClientRect();
+  tip.style.display = "block";
+  let html = `<span class="t-name">${SKILLS[i].label}</span> <span class="t-val">${values[i]} / 4</span>`;
+  if (compareValues) html += `<br><span class="t-val">vs ${compareValues[i]} / 4</span>`;
+  tip.innerHTML = html;
+  tip.style.left = (ev.clientX - host.left + 14) + "px";
+  tip.style.top = (ev.clientY - host.top - 10) + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+
+// ---------------- toolbar ----------------
+const presetSel = document.getElementById("preset");
+const compareSel = document.getElementById("compare");
+Object.keys(PRESETS).forEach(name => {
+  presetSel.add(new Option(name, name));
+  if (name !== "Custom") compareSel.add(new Option(name, name));
+});
+compareSel.add(new Option("None", "None"), 0);
+compareSel.value = "None";
+presetSel.value = "Balanced 2026 DS";
+
+presetSel.addEventListener("change", () => {
+  const p = PRESETS[presetSel.value];
+  if (!p) return;
+  values = p.slice();
+  document.querySelectorAll('#sliders input[type="range"]').forEach(sl => {
+    sl.value = values[+sl.dataset.idx];
+    document.getElementById("val-" + sl.dataset.idx).textContent = values[+sl.dataset.idx];
+  });
+  if (presetSel.value !== "Custom") {
+    const nameBox = document.getElementById("portraitName");
+    if (!nameBox.dataset.userEdited) nameBox.value = presetSel.value;
+  }
+  draw();
+});
+compareSel.addEventListener("change", () => {
+  compareValues = compareSel.value === "None" ? null : PRESETS[compareSel.value].slice();
+  draw();
+});
+document.getElementById("portraitName").addEventListener("input", e => {
+  e.target.dataset.userEdited = "1";
+  draw();
+});
+
+// ---------------- export ----------------
+function standaloneSvg() {
+  const clone = svg.cloneNode(true);
+  clone.setAttribute("xmlns", svgNS);
+  el("rect", { x: 0, y: 0, width: 1120, height: 700, fill: css("--surface-1") }, clone)
+  clone.insertBefore(clone.lastChild, clone.firstChild);
+  return new XMLSerializer().serializeToString(clone);
+}
+function fileName(ext) {
+  const n = (document.getElementById("portraitName").value || "skills").trim()
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return (n || "skills") + "-radar." + ext;
+}
+document.getElementById("downloadSvg").addEventListener("click", () => {
+  const blob = new Blob([standaloneSvg()], { type: "image/svg+xml" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName("svg");
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+document.getElementById("downloadPng").addEventListener("click", () => {
+  const img = new Image();
+  const url = URL.createObjectURL(new Blob([standaloneSvg()], { type: "image/svg+xml" }));
+  img.onload = () => {
+    const cv = document.createElement("canvas");
+    cv.width = 2240; cv.height = 1400;
+    const ctx = cv.getContext("2d");
+    ctx.drawImage(img, 0, 0, 2240, 1400);
+    URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.href = cv.toDataURL("image/png");
+    a.download = fileName("png");
+    a.click();
+  };
+  img.src = url;
+});
+document.getElementById("copyValues").addEventListener("click", async () => {
+  const text = SKILLS.map((s, i) => `${s.label}: ${values[i]}`).join("\n");
+  try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
+});
+
+// theme changes re-draw (colors are read from CSS at draw time)
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+
+buildSliders();
+draw();
+</script>
+</body>
+</html>
