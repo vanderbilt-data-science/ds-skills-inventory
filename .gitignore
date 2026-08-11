@@ -1,3 +1,8 @@
+# Source recordings / transcripts (not for publication)
+*.vtt
+*.mp4
+*.m4a
+
 __pycache__/
 *.pyc
 .DS_Store
