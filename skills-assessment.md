@@ -55,6 +55,11 @@ scientists differentiate as AI compresses the technical floor.
 
 ## 3. Rung ladders for the changed axes (0–4)
 
+These four are the summary ladders — the axes whose *definitions* changed.
+Behaviorally anchored ladders for **all nine** axes, with evidence anchors,
+calibration rules, and the self-assessment procedure, are in
+[`skill-level-rubric.md`](skill-level-rubric.md).
+
 ### AI Foundations
 | Level | Description |
 |---|---|
