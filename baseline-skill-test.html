@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Scientist Baseline Skill Test</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --c-analytical: #2a78d6;
+    --c-aiera: #eb6834;
+    --c-eng: #1baf7a;
+    --c-human: #eda100;
+    --badge-bg: rgba(235,104,52,0.14);
+    --badge-fg: #a63c14;
+    --warn-bg: rgba(219,60,60,0.10);
+    --warn-fg: #b32e2e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --c-analytical: #3987e5;
+      --c-aiera: #d95926;
+      --c-eng: #199e70;
+      --c-human: #c98500;
+      --badge-bg: rgba(217,89,38,0.22);
+      --badge-fg: #f0a184;
+      --warn-bg: rgba(219,60,60,0.16);
+      --warn-fg: #e88585;
+    }
+  }
+  :root[data-theme="light"] .viz-root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; }
+  body.viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { color: var(--text-secondary); font-size: 13.5px; margin-top: 6px; max-width: 900px; line-height: 1.5; }
+  header .rules { font-size: 12.5px; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin: 16px 0;
+  }
+  .toolbar label { font-size: 12.5px; color: var(--text-secondary); }
+  select, button, input[type="text"] {
+    font: inherit; font-size: 13.5px;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--text-muted); }
+  button.primary { background: var(--series-1); color: #fff; border-color: transparent; font-weight: 600; }
+  button.primary:hover { opacity: .92; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  input[type="text"] { width: 100%; }
+
+  .progress { font-size: 12.5px; color: var(--text-muted); margin: 4px 0 18px; }
+
+  .axis-card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+  }
+  .axis-card h2 {
+    font-size: 15.5px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+    margin-bottom: 4px;
+  }
+  .axis-card h2 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .axis-card .probe { font-size: 13px; color: var(--text-secondary); font-style: italic; margin-bottom: 12px; }
+  .rung-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .rung {
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px;
+    cursor: pointer; font-size: 13px; line-height: 1.45;
+  }
+  .rung:hover { border-color: var(--text-muted); }
+  .rung.selected { border-color: var(--series-1); background: color-mix(in srgb, var(--series-1) 8%, transparent); }
+  .rung input { margin-top: 3px; accent-color: var(--series-1); flex: none; }
+  .rung .lvl { font-weight: 700; flex: none; width: 18px; }
+  .checks { display: grid; gap: 10px; margin-top: 10px; }
+  .check-row { font-size: 12.5px; color: var(--text-secondary); }
+  .check-row label.line { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; font-weight: 600; color: var(--text-primary); }
+  .check-row .sub { color: var(--text-muted); font-weight: 400; font-size: 11.5px; margin-left: 24px; margin-bottom: 5px; }
+  .check-row input[type="checkbox"] { accent-color: var(--series-1); }
+  .yn { display: flex; gap: 14px; margin-left: 24px; }
+  .yn label { display: flex; align-items: center; gap: 5px; font-weight: 400; cursor: pointer; }
+  .yn input { accent-color: var(--series-1); }
+  .evidence-input { margin-left: 24px; margin-top: 2px; }
+  .axis-score {
+    margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border);
+    font-size: 12.5px; color: var(--text-secondary); display: none;
+  }
+  .axis-score.show { display: block; }
+  .axis-score b { color: var(--text-primary); font-size: 14px; }
+  .axis-score .adj { color: var(--warn-fg); }
+
+  select.decay { margin-left: 24px; }
+
+  .layout { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .result-panel {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px; margin-top: 8px; display: none;
+  }
+  .result-panel.show { display: block; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .result-grid { grid-template-columns: 1fr; } }
+  #chart { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 18px; justify-content: center; font-size: 13px; color: var(--text-secondary); padding: 6px 0 2px; }
+  .legend .key { display: inline-flex; align-items: center; gap: 7px; }
+  .legend .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .archetype-list { font-size: 13px; margin-top: 8px; }
+  .archetype-list .row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .archetype-list .row.best { font-weight: 700; color: var(--series-1); }
+  .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+  .btnrow { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Data Scientist Baseline Skill Test</h1>
+    <p>A scored companion to the <a href="skill-level-rubric.md">skill-level rubric</a> and the
+    <a href="ds-skills-explorer.html">explorer</a>. For each of the nine axes, pick the highest rung you can back
+    up with real evidence — the test then applies the rubric's own calibration rules automatically, so the number
+    you get is closer to what a hard grader would give you than a raw self-rating.</p>
+    <p class="rules">
+      <b>Artifact rule:</b> a level ≥1 claim without a named artifact drops half a step. &nbsp;
+      <b>Failure-mode rule:</b> a level ≥2 claim without a named failure you caught drops half a step. &nbsp;
+      <b>Outsider rule:</b> if a colleague from last quarter wouldn't give you the same number, use theirs.
+    </p>
+  </header>
+
+  <div class="toolbar">
+    <label>Your name
+      <input type="text" id="portraitName" value="" placeholder="for the exported portrait" style="min-width:220px">
+    </label>
+    <button id="fillDemo" title="Fill with a mid-level sample profile, useful for trying the tool">Try sample answers</button>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div id="axes"></div>
+
+  <div class="btnrow">
+    <button class="primary" id="computeBtn" disabled>Compute my baseline</button>
+    <span class="progress" id="blocker"></span>
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <h2 style="font-size:17px;margin-bottom:10px;">Your baseline portrait</h2>
+    <div class="result-grid">
+      <div>
+        <svg id="chart" viewBox="0 0 1000 640" role="img" aria-label="Radar chart of baseline skill levels"></svg>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div>
+        <div id="scoreTable"></div>
+        <h3 style="font-size:13.5px;margin-top:14px;">Nearest archetype</h3>
+        <div class="archetype-list" id="archList"></div>
+        <div class="footnote" id="fastSlow"></div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button id="downloadSvg">Download SVG</button>
+      <button id="downloadPortrait">Download portrait (YAML)</button>
+      <button id="recompute">Recompute</button>
+    </div>
+    <div class="footnote">This is a baseline, not a verdict. Re-run quarterly, after every new agent-harness
+      generation (AI Agents decays 0.5 per six quiet months, floored at 1 if you were ever ≥2), and after any
+      project that ended badly — that's when the artifact rule is easiest to apply honestly.</div>
+  </div>
+</div>
+
+<script>
+// ---------------- data ----------------
+const CLUSTERS = [
+  { name: "Analytical core", varName: "--c-analytical" },
+  { name: "AI",              varName: "--c-aiera" },
+  { name: "Engineering",     varName: "--c-eng" },
+  { name: "Human interface", varName: "--c-human" },
+];
+// order = SKILLS order used by the explorer / rubric portrait template
+const SKILLS = [
+  { id: "stats",   label: "Statistics & Modeling",   cluster: 0 },
+  { id: "aifound", label: "AI Foundations",           cluster: 1 },
+  { id: "agents",  label: "AI Agents & Frameworks",   cluster: 1 },
+  { id: "prog",    label: "Programming",              cluster: 2 },
+  { id: "dataeng", label: "Data Engineering",         cluster: 2 },
+  { id: "viz",     label: "Visualization",            cluster: 3 },
+  { id: "comm",    label: "Communication",            cluster: 3 },
+  { id: "story",   label: "Storytelling",             cluster: 3 },
+  { id: "domain",  label: "Domain Knowledge",         cluster: 3 },
+];
+const PRESETS = {
+  "Balanced 2026 DS":[3, 3, 3, 2, 2, 3, 3, 3, 2],
+  "The Guide":       [2, 2, 3, 1, 1, 4, 4, 4, 2],
+  "The Builder":     [3, 2, 3, 3, 3, 2, 2, 3, 2],
+  "The Architect":   [2, 3, 3, 4, 4, 2, 2, 2, 3],
+  "The Visionary":   [3, 4, 4, 2, 2, 2, 3, 3, 4],
+  "The Toolmaker":   [2, 4, 4, 3, 2, 2, 2, 1, 2],
+};
+
+// Standard-ladder axes (everything except agents and programming, which have bespoke UI/scoring below)
+const LADDERS = {
+  stats: {
+    probe: "One course, two, or beyond into Bayesian? Can you build the model that holds everything else equal?",
+    rungs: [
+      "Coursework or none. I run a test or regression when told which one.",
+      "1–2 courses' worth. Applied inferential stats/regression to a real question; I pick the method with help.",
+      "I choose and defend the specification myself — confounds, seasonality, assumptions, honest uncertainty. Comfortable with Bayesian basics.",
+      "Frequentist and Bayesian as each fits; I design the study, not just the analysis. Others bring me designs before collecting data.",
+      "Research-grade. I develop or extend methods, publish or review, consulted beyond my organization.",
+    ],
+  },
+  aifound: {
+    probe: "Could you explain a transformer to someone — and name a decision you'd make differently because of what you understand?",
+    rungs: [
+      "I use models with no mechanistic account of them. Coursework only.",
+      "Applied classical ML / off-the-shelf foundation models to real problems; I can explain at block-diagram level (tokens, attention, pretrain vs. fine-tune).",
+      "Solid across method families; I run error analysis and basic evals. My decisions cite mechanism, not vibes.",
+      "I design evaluation suites, know when adaptation (retrieval/fine-tune/distill) is worth it, and reason about distribution shift and responsible-AI tradeoffs.",
+      "I advance the frontier — novel methods, research-grade work others build on.",
+    ],
+  },
+  dataeng: {
+    probe: "Have you ever gotten data all the way to a dashboard yourself?",
+    rungs: [
+      "No hands-on data access experience. Someone hands me a file.",
+      "I can get the data I need — SQL basics (AI-assisted fine), APIs, file wrangling. One-off extracts I check.",
+      "Working knowledge of warehouses/lakes; grain and joins right, quality checks run, source-to-dashboard/model myself. Understand both the ML and AI-corpus forks.",
+      "I build pipelines and orchestration that survive without me — scheduling, idempotency, monitoring, lineage, governance, cost.",
+      "I design platforms — streaming, very large scale, specialized infrastructure.",
+    ],
+  },
+  viz: {
+    probe: "Have you built something genuinely compelling for a real problem?",
+    rungs: [
+      "Default charts, chosen by habit or whatever the library did.",
+      "Correct, readable charts for real work — right form, labels, units, honest scales.",
+      "I design for perception and cognitive load — channels that pop, working-memory limits respected, annotated, CVD/contrast aware.",
+      "I build visual systems — dashboards/tools that hold up in real use, consistent encodings, tuned to audience/medium. I can justify every decision.",
+      "Original visual forms or tooling that others adopt; recognized design work.",
+    ],
+  },
+  comm: {
+    probe: "Could you stand up in front of executives and defend it?",
+    rungs: [
+      "I report results informally, to peers, in the order I did the work.",
+      "I present clearly to a friendly technical audience and write a readable summary.",
+      "I present to non-technical stakeholders and executives — lead with the decision, state uncertainty honestly, take hard questions. My writing gets acted on.",
+      "I build the case and the coalition — bring IT/security/legal in as partners, get solutions adopted. I'm sent into the hard room.",
+      "I shape the conversation beyond my organization — invited talks, published work.",
+    ],
+  },
+  story: {
+    probe: "Could you explain something complex to a non-technical audience as a story?",
+    rungs: [
+      "I recite findings in the order I produced them.",
+      "I structure a narrative — setup, tension, resolution — for a report or a talk.",
+      "I make genuinely complex material intuitive through story/analogy without falsifying it, and can retarget it for different audiences.",
+      "I build the narrative that carries an initiative — people repeat my framing back unprompted. I use story to move an organization.",
+      "Recognized communicator; my framing becomes the shorthand others use.",
+    ],
+  },
+  domain: {
+    probe: "Is there a field you actually know?",
+    rungs: [
+      "None. I'd need someone to tell me what the columns mean.",
+      "I know one domain's vocabulary and main processes well enough to follow an SME and ask reasonable questions.",
+      "I ask the right question, spot a number that can't be true, challenge a stakeholder's framing. I know how the work is actually done.",
+      "The domain's own experts treat me as a peer. I understand incentives, politics, and regulatory depth.",
+      "I'm an expert in the domain in my own right, independently of the data science.",
+    ],
+  },
+};
+
+const AGENTS_LADDER = {
+  probe: "Are you actually delegating real work — and how do you know the result is right?",
+  rungs: [
+    "Chat-style use only. I paste a question in and copy an answer out. I run everything myself.",
+    "Productive daily delegation. I write specifications (goal, constraints, acceptance criteria), keep durable project context, and review everything that comes back.",
+    "I build capability, not just output — reusable Agent Skills someone else has used, real MCP/tool connections, and verification built into the loop.",
+    "I design systems of agents — orchestration, evals/guardrails/monitoring designed in, cost and permission budgets. I ship packaged capability others install.",
+    "I create novel agent architectures, frameworks, or standards that other people adopt.",
+  ],
+};
+
+const PROG_A = {
+  label: "Dial A — Agentic delivery",
+  desc: "What you can get built and shipped by directing agents.",
+  rungs: [
+    "None.",
+    "Scripts, notebooks, and small analyses via an agent; I can follow and modify what comes back.",
+    "Multi-file projects with tests and a real git workflow; I can direct a refactor and tell when the agent has gone sideways.",
+    "Production-grade systems: architecture decisions I make and defend, CI, review standards for AI-generated code, several agents in flight at once.",
+    "Systems, tooling, or standards that other builders adopt.",
+  ],
+};
+const PROG_B = {
+  label: "Dial B — Unaided fluency",
+  desc: "What you can read, write, and debug with the agent turned off.",
+  rungs: [
+    "None.",
+    "One language; I can read a script and change it.",
+    "Two or more languages, or real depth in one. I can read unfamiliar code and locate the bug — people brought me their bugs.",
+    "I design and write non-trivial software by hand — data structures, performance, debugging under pressure.",
+    "Expert engineer; the separate-engineering-team tier.",
+  ],
+};
+
+const state = {}; // axisId -> { level, evidence, failure, outsider, ...special }
+
+// ---------------- render standard axis card ----------------
+const axesHost = document.getElementById("axes");
+
+function clusterColor(clusterIdx) { return `var(${CLUSTERS[clusterIdx].varName})`; }
+
+function makeCheckRow(axisId, kind) {
+  const div = document.createElement("div");
+  div.className = "check-row";
+  if (kind === "artifact") {
+    div.innerHTML = `<label class="line"><input type="checkbox" data-axis="${axisId}" data-role="artifact-toggle"> I can name a specific artifact (repo, dashboard, deployed model, talk, Skill) and who used it — within 20 seconds</label>
+      <div class="sub">Required for any level ≥1. Without it, drop half a step.</div>
+      <input type="text" class="evidence-input" placeholder="Name it here (kept local, only used for your exported portrait)" data-axis="${axisId}" data-role="evidence">`;
+  } else if (kind === "failure") {
+    div.innerHTML = `<label class="line"><input type="checkbox" data-axis="${axisId}" data-role="failure"> I can describe how work at this level characteristically goes wrong, and a time I caught it</label>
+      <div class="sub">Required for any level ≥2. Without it, drop half a step.</div>`;
+  } else if (kind === "outsider") {
+    div.innerHTML = `<label class="line">A colleague who worked with me last quarter would give me this same number</label>
+      <div class="yn">
+        <label><input type="radio" name="outsider-${axisId}" data-axis="${axisId}" data-role="outsider" value="yes"> Yes</label>
+        <label><input type="radio" name="outsider-${axisId}" data-axis="${axisId}" data-role="outsider" value="no"> No — they'd say lower</label>
+      </div>`;
+  }
+  return div;
+}
+
+function renderLadderCard(axisId, label, clusterIdx, probe, rungs, opts) {
+  opts = opts || {};
+  const card = document.createElement("div");
+  card.className = "axis-card";
+  card.dataset.axis = axisId;
+  card.innerHTML = `<h2><span class="dot" style="background:${clusterColor(clusterIdx)}"></span>${label}</h2>
+    <div class="probe">${probe}</div>`;
+  const group = document.createElement("div");
+  group.className = "rung-group";
+  rungs.forEach((text, lvl) => {
+    const row = document.createElement("label");
+    row.className = "rung";
+    row.innerHTML = `<input type="radio" name="ladder-${axisId}" value="${lvl}"><span class="lvl">${lvl}</span><span>${text}</span>`;
+    group.appendChild(row);
+    row.addEventListener("click", () => selectRung(axisId, lvl, group));
+  });
+  card.appendChild(group);
+
+  if (!opts.skipChecks) {
+    const checks = document.createElement("div");
+    checks.className = "checks";
+    checks.appendChild(makeCheckRow(axisId, "artifact"));
+    checks.appendChild(makeCheckRow(axisId, "failure"));
+    checks.appendChild(makeCheckRow(axisId, "outsider"));
+    card.appendChild(checks);
+  }
+
+  const scoreDiv = document.createElement("div");
+  scoreDiv.className = "axis-score";
+  scoreDiv.id = `score-${axisId}`;
+  card.appendChild(scoreDiv);
+
+  axesHost.appendChild(card);
+  return card;
+}
+
+function selectRung(axisId, lvl, group) {
+  state[axisId] = state[axisId] || {};
+  state[axisId].level = lvl;
+  group.querySelectorAll(".rung").forEach(r => r.classList.remove("selected"));
+  group.children[lvl].classList.add("selected");
+  updateProgress();
+}
+
+// build the 7 standard axes
+Object.keys(LADDERS).forEach(id => {
+  const skill = SKILLS.find(s => s.id === id);
+  const l = LADDERS[id];
+  renderLadderCard(id, skill.label, skill.cluster, l.probe, l.rungs);
+});
+
+// ---------------- agents axis (ladder + currency decay) ----------------
+(function buildAgents() {
+  const skill = SKILLS.find(s => s.id === "agents");
+  const card = renderLadderCard("agents", skill.label, skill.cluster, AGENTS_LADDER.probe, AGENTS_LADDER.rungs);
+  const decayDiv = document.createElement("div");
+  decayDiv.className = "check-row";
+  decayDiv.innerHTML = `<label class="line">How long since your last sustained hands-on period with current agent tooling?</label>
+    <div class="sub">Currency decay: −0.5 per six quiet months, floored at 1 if you've ever reached level 2+.</div>
+    <select class="decay" data-axis="agents" data-role="decay">
+      <option value="0">Still active — within the last month</option>
+      <option value="0.5">1–6 months ago</option>
+      <option value="1">6–12 months ago</option>
+      <option value="1.5">12–18 months ago</option>
+      <option value="2">18+ months ago</option>
+    </select>`;
+  // insert decay control before the score div
+  card.insertBefore(decayDiv, document.getElementById("score-agents"));
+})();
+
+// ---------------- programming axis (two dials) ----------------
+(function buildProgramming() {
+  const skill = SKILLS.find(s => s.id === "prog");
+  const card = document.createElement("div");
+  card.className = "axis-card";
+  card.dataset.axis = "prog";
+  card.innerHTML = `<h2><span class="dot" style="background:${clusterColor(skill.cluster)}"></span>${skill.label}</h2>
+    <div class="probe">How many languages — and were you the person people brought their bugs to? Then: what have you shipped through an agent that you could defend line by line?</div>`;
+
+  [PROG_A, PROG_B].forEach((dial, dIdx) => {
+    const dKey = dIdx === 0 ? "A" : "B";
+    const sub = document.createElement("div");
+    sub.style.marginBottom = "10px";
+    sub.innerHTML = `<div style="font-size:12.5px;font-weight:700;margin:8px 0 2px;">${dial.label}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">${dial.desc}</div>`;
+    const group = document.createElement("div");
+    group.className = "rung-group";
+    dial.rungs.forEach((text, lvl) => {
+      const row = document.createElement("label");
+      row.className = "rung";
+      row.innerHTML = `<input type="radio" name="ladder-prog${dKey}" value="${lvl}"><span class="lvl">${lvl}</span><span>${text}</span>`;
+      group.appendChild(row);
+      row.addEventListener("click", () => {
+        state.prog = state.prog || {};
+        state.prog[dKey] = lvl;
+        group.querySelectorAll(".rung").forEach(r => r.classList.remove("selected"));
+        group.children[lvl].classList.add("selected");
+        updateProgress();
+      });
+    });
+    sub.appendChild(group);
+    card.appendChild(sub);
+  });
+
+  const checks = document.createElement("div");
+  checks.className = "checks";
+  checks.appendChild(makeCheckRow("prog", "artifact"));
+  card.appendChild(checks);
+
+  const scoreDiv = document.createElement("div");
+  scoreDiv.className = "axis-score";
+  scoreDiv.id = "score-prog";
+  card.appendChild(scoreDiv);
+
+  axesHost.appendChild(card);
+})();
+
+// ---------------- progress / gating ----------------
+function isAxisAnswered(id) {
+  if (id === "prog") return state.prog && state.prog.A !== undefined && state.prog.B !== undefined;
+  return state[id] && state[id].level !== undefined;
+}
+function updateProgress() {
+  const done = SKILLS.filter(s => isAxisAnswered(s.id)).length;
+  document.getElementById("progress").textContent = `${done} / ${SKILLS.length} axes answered`;
+  const btn = document.getElementById("computeBtn");
+  const blocker = document.getElementById("blocker");
+  if (done === SKILLS.length) {
+    btn.disabled = false;
+    blocker.textContent = "";
+  } else {
+    btn.disabled = true;
+    blocker.textContent = `Answer all ${SKILLS.length} axes to compute your baseline.`;
+  }
+}
+updateProgress();
+
+// ---------------- scoring ----------------
+function clamp(v) { return Math.max(0, Math.min(4, v)); }
+function roundHalf(v) { return Math.round(v * 2) / 2; }
+
+function readCheckState(axisId) {
+  const artifactToggle = document.querySelector(`[data-axis="${axisId}"][data-role="artifact-toggle"]`);
+  const evidence = document.querySelector(`[data-axis="${axisId}"][data-role="evidence"]`);
+  const failure = document.querySelector(`[data-axis="${axisId}"][data-role="failure"]`);
+  const outsider = document.querySelector(`input[data-axis="${axisId}"][data-role="outsider"]:checked`);
+  return {
+    hasArtifact: !!(artifactToggle && artifactToggle.checked) && !!(evidence && evidence.value.trim().length > 1),
+    hasFailure: !!(failure && failure.checked),
+    outsiderNo: !!(outsider && outsider.value === "no"),
+    evidenceText: evidence ? evidence.value.trim() : "",
+  };
+}
+
+function scoreStandardAxis(axisId) {
+  const base = state[axisId].level;
+  const c = readCheckState(axisId);
+  let adj = 0;
+  const notes = [];
+  if (base >= 1 && !c.hasArtifact) { adj -= 0.5; notes.push("no named artifact (artifact rule)"); }
+  if (base >= 2 && !c.hasFailure) { adj -= 0.5; notes.push("no named failure mode caught (failure-mode rule)"); }
+  if (c.outsiderNo) { adj -= 0.5; notes.push("outsider check said lower"); }
+  const score = roundHalf(clamp(base + adj));
+  return { base, adj, score, notes, evidence: c.evidenceText };
+}
+
+function scoreAgents() {
+  const s = scoreStandardAxis("agents");
+  const decaySel = document.querySelector('[data-axis="agents"][data-role="decay"]');
+  const decay = decaySel ? parseFloat(decaySel.value) : 0;
+  const everTwoPlus = s.base >= 2;
+  let decayed = s.score - decay;
+  const floor = everTwoPlus ? 1 : 0;
+  decayed = Math.max(floor, decayed);
+  decayed = roundHalf(clamp(decayed));
+  if (decay > 0) s.notes.push(`currency decay −${decay} (floored at ${floor})`);
+  s.score = decayed;
+  return s;
+}
+
+function scoreProgramming() {
+  const A = state.prog.A, B = state.prog.B;
+  const mean = (A + B) / 2;
+  const capped = Math.min(mean, B + 1);
+  const score = roundHalf(clamp(capped));
+  const c = readCheckState("prog");
+  const notes = [`A=${A}, B=${B}`, `min(mean, B+1) = min(${mean.toFixed(2)}, ${B + 1}) = ${capped.toFixed(2)}`];
+  if (!c.hasArtifact) notes.push("no named artifact (artifact rule) — consider a half step lower");
+  return { base: mean, adj: capped - mean, score, notes, evidence: c.evidenceText, A, B };
+}
+
+let results = null;
+
+document.getElementById("computeBtn").addEventListener("click", compute);
+document.getElementById("recompute").addEventListener("click", compute);
+
+function compute() {
+  results = {};
+  SKILLS.forEach(s => {
+    let r;
+    if (s.id === "agents") r = scoreAgents();
+    else if (s.id === "prog") r = scoreProgramming();
+    else r = scoreStandardAxis(s.id);
+    results[s.id] = r;
+    const div = document.getElementById(`score-${s.id}`);
+    div.classList.add("show");
+    const adjTxt = r.adj !== 0 ? ` <span class="adj">(${r.adj > 0 ? "+" : ""}${r.adj.toFixed(1)} — ${r.notes.join("; ")})</span>` : (r.notes.length ? ` <span class="adj">(${r.notes.join("; ")})</span>` : "");
+    div.innerHTML = `Placed at level <b>${r.base.toFixed ? r.base.toFixed(1) : r.base}</b> → baseline score <b>${r.score}</b>${adjTxt}`;
+  });
+  renderResults();
+  document.getElementById("resultPanel").classList.add("show");
+  document.getElementById("resultPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ---------------- radar chart (mirrors ds-skills-explorer.html) ----------------
+const svg = document.getElementById("chart");
+const N = SKILLS.length, CX = 480, CY = 330, R = 215, MAXV = 4;
+const svgNS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.body).getPropertyValue(v).trim();
+const angle = i => -Math.PI / 2 + 2 * Math.PI * i / N;
+const pt = (i, r) => [CX + r * Math.cos(angle(i)), CY + r * Math.sin(angle(i))];
+const el = (tag, attrs, parent) => {
+  const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+
+function drawChart(values) {
+  svg.innerHTML = "";
+  const name = (document.getElementById("portraitName").value || "My baseline").trim();
+  el("text", { x: CX, y: 36, "text-anchor": "middle", "font-size": 24, "font-weight": 700,
+               fill: css("--text-primary"), "font-family": "system-ui, sans-serif" }, svg)
+    .textContent = name;
+  for (let v = 1; v <= MAXV; v++) {
+    el("circle", { cx: CX, cy: CY, r: R * v / MAXV, fill: "none",
+                   stroke: v === MAXV ? css("--axis") : css("--grid"), "stroke-width": 1 }, svg);
+    el("text", { x: CX + 10, y: CY - R * v / MAXV + 5, "font-size": 12,
+                 fill: css("--text-muted"), "font-family": "system-ui, sans-serif" }, svg).textContent = v;
+  }
+  for (let i = 0; i < N; i++) {
+    const [x, y] = pt(i, R);
+    el("line", { x1: CX, y1: CY, x2: x, y2: y, stroke: css("--grid"), "stroke-width": 1 }, svg);
+  }
+  const pts = values.map((v, i) => pt(i, R * v / MAXV).join(",")).join(" ");
+  el("polygon", { points: pts, fill: css("--series-1"), "fill-opacity": 0.22,
+                  stroke: css("--series-1"), "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+  values.forEach((v, i) => {
+    const [x, y] = pt(i, R * v / MAXV);
+    el("circle", { cx: x, cy: y, r: 4, fill: css("--series-1") }, svg);
+  });
+  SKILLS.forEach((s, i) => {
+    const a = angle(i), c = Math.cos(a), sn = Math.sin(a);
+    const lx = CX + (R + 26) * c, ly = CY + (R + 26) * sn;
+    let anchor = "middle";
+    if (c > 0.35) anchor = "start";
+    if (c < -0.35) anchor = "end";
+    let dy = 6;
+    if (sn < -0.85) dy = 0;
+    if (sn > 0.85) dy = 14;
+    el("text", { x: lx, y: ly + dy, "text-anchor": anchor, "font-size": 15, "font-weight": 600,
+                 fill: css("--text-primary"), "font-family": "system-ui, sans-serif" }, svg).textContent = s.label;
+  });
+  document.getElementById("legend").innerHTML =
+    `<span class="key"><span class="swatch" style="background:var(--series-1)"></span>${name}</span>`;
+}
+
+function renderResults() {
+  const values = SKILLS.map(s => results[s.id].score);
+  drawChart(values);
+
+  const tbl = document.createElement("table");
+  tbl.style.width = "100%";
+  tbl.style.fontSize = "13px";
+  tbl.style.borderCollapse = "collapse";
+  tbl.innerHTML = SKILLS.map(s => `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:5px 6px 5px 0;">${s.label}</td>
+      <td style="padding:5px 0;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;">${results[s.id].score}</td>
+    </tr>`).join("");
+  const host = document.getElementById("scoreTable");
+  host.innerHTML = "";
+  host.appendChild(tbl);
+
+  // nearest archetype: mean absolute difference in SKILLS order
+  const diffs = Object.entries(PRESETS).map(([name, vec]) => {
+    const mad = vec.reduce((sum, v, i) => sum + Math.abs(v - values[i]), 0) / vec.length;
+    return { name, mad };
+  }).sort((a, b) => a.mad - b.mad);
+  const archHost = document.getElementById("archList");
+  archHost.innerHTML = diffs.map((d, i) =>
+    `<div class="row ${i === 0 ? "best" : ""}">${d.name}<span>${d.mad.toFixed(2)}</span></div>`
+  ).join("");
+
+  const fastIds = ["prog", "dataeng", "agents"];
+  const slowIds = ["stats", "viz", "comm", "story", "domain"];
+  const lowestFast = fastIds.map(id => ({ id, score: results[id].score })).sort((a, b) => a.score - b.score)[0];
+  const lowestSlow = slowIds.map(id => ({ id, score: results[id].score })).sort((a, b) => a.score - b.score)[0];
+  const label = id => SKILLS.find(s => s.id === id).label;
+  document.getElementById("fastSlow").innerHTML =
+    `Fast gap worth starting this week: <b>${label(lowestFast.id)}</b> (${lowestFast.score}) — moves in weeks.<br>` +
+    `Slow gap worth starting now regardless: <b>${label(lowestSlow.id)}</b> (${lowestSlow.score}) — moves in a year or more.`;
+}
+
+// ---------------- export ----------------
+function standaloneSvg() {
+  const clone = svg.cloneNode(true);
+  clone.setAttribute("xmlns", svgNS);
+  el("rect", { x: 0, y: 0, width: 1000, height: 640, fill: css("--surface-1") }, clone);
+  clone.insertBefore(clone.lastChild, clone.firstChild);
+  return new XMLSerializer().serializeToString(clone);
+}
+function fileSafeName() {
+  const n = (document.getElementById("portraitName").value || "baseline").trim()
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return n || "baseline";
+}
+document.getElementById("downloadSvg").addEventListener("click", () => {
+  const blob = new Blob([standaloneSvg()], { type: "image/svg+xml" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = fileSafeName() + "-baseline-radar.svg";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+document.getElementById("downloadPortrait").addEventListener("click", () => {
+  if (!results) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const evid = id => (results[id].evidence || "").replace(/"/g, '\\"');
+  const yaml = `portrait:
+  name: ${document.getElementById("portraitName").value || ""}
+  date: ${today}
+  source: baseline-skill-test.html (auto-scored, not a peer/self-review pass)
+  scores:
+    stats: ${results.stats.score}
+    aifound: ${results.aifound.score}
+    agents: ${results.agents.score}
+    prog: ${results.prog.score}
+    dataeng: ${results.dataeng.score}
+    viz: ${results.viz.score}
+    comm: ${results.comm.score}
+    story: ${results.story.score}
+    domain: ${results.domain.score}
+  programming_dials:
+    agentic: ${results.prog.A}
+    unaided: ${results.prog.B}
+  evidence:
+    stats: "${evid("stats")}"
+    aifound: "${evid("aifound")}"
+    agents: "${evid("agents")}"
+    prog: "${evid("prog")}"
+    dataeng: "${evid("dataeng")}"
+    viz: "${evid("viz")}"
+    comm: "${evid("comm")}"
+    story: "${evid("story")}"
+    domain: "${evid("domain")}"
+  adjustments_applied:
+${SKILLS.map(s => `    ${s.id}: "${results[s.id].notes.join("; ").replace(/"/g, '\\"')}"`).join("\n")}
+`;
+  const blob = new Blob([yaml], { type: "text/yaml" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = fileSafeName() + "-baseline-portrait.yaml";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+// ---------------- sample fill (for trying the tool) ----------------
+document.getElementById("fillDemo").addEventListener("click", () => {
+  const sample = { stats: 2, aifound: 2, agents: 1, dataeng: 2, viz: 1, comm: 2, story: 1, domain: 1 };
+  Object.entries(sample).forEach(([id, lvl]) => {
+    const input = document.querySelector(`input[name="ladder-${id}"][value="${lvl}"]`);
+    if (input) input.closest(".rung").click();
+    const artifact = document.querySelector(`[data-axis="${id}"][data-role="artifact-toggle"]`);
+    const evidence = document.querySelector(`[data-axis="${id}"][data-role="evidence"]`);
+    if (artifact) artifact.checked = true;
+    if (evidence) evidence.value = "sample artifact — replace with your own";
+    const failure = document.querySelector(`[data-axis="${id}"][data-role="failure"]`);
+    if (failure) failure.checked = true;
+    const outsiderYes = document.querySelector(`input[data-axis="${id}"][data-role="outsider"][value="yes"]`);
+    if (outsiderYes) outsiderYes.checked = true;
+  });
+  const decaySel = document.querySelector('[data-axis="agents"][data-role="decay"]');
+  if (decaySel) decaySel.value = "0.5";
+  const progA = document.querySelector('input[name="ladder-progA"][value="2"]');
+  const progB = document.querySelector('input[name="ladder-progB"][value="2"]');
+  if (progA) progA.closest(".rung").click();
+  if (progB) progB.closest(".rung").click();
+  document.getElementById("portraitName").value = "Sample profile";
+  updateProgress();
+});
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (results) drawChart(SKILLS.map(s => results[s.id].score)); });
+</script>
+</body>
+</html>

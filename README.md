@@ -177,6 +177,11 @@ for all nine axes, an artifact rule that keeps the numbers honest, the
 verification cap on Programming, the currency-decay rule on AI Agents, and a
 portrait template to keep alongside your exported chart.
 
+For a **baseline you can re-run every quarter without re-reading the whole
+rubric**, open [`baseline-skill-test.html`](baseline-skill-test.html) — it turns
+the same nine ladders into a scored quiz, applies the calibration rules for you,
+and exports the portrait alongside a radar chart.
+
 For the quick pass: walk the nine sliders one at a time, ask an honest question
 per axis, and set the value:
 
@@ -209,6 +214,7 @@ exercise on the axis this revision added.
 | [`make_svg.py`](make_svg.py) | Generator for the SVG. Skills, values, and clusters are a plain Python list at the top. Standard library only. |
 | [`skills-assessment.md`](skills-assessment.md) | The taxonomy: what changed and why, the 0–4 rung ladders, implications for the archetypes, and what was considered and set aside. |
 | [`skill-level-rubric.md`](skill-level-rubric.md) | **The rating rubric.** Behaviorally anchored 0–4 ladders for all nine axes, calibration rules, and the procedure for turning nine numbers into a portrait. |
+| [`baseline-skill-test.html`](baseline-skill-test.html) | **Baseline skill test.** A scored, self-contained quiz version of the rubric — pick a rung per axis, and it applies the artifact/failure-mode/outsider rules, the Programming verification cap, and the AI Agents currency decay automatically, then plots the result and exports a portrait. |
 | [`vis-design-rationale.md`](vis-design-rationale.md) | Why the visualization looks and behaves the way it does — including an honest accounting of radar charts' weaknesses and how each is managed. |
 
 ## Using the explorer
