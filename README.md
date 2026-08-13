@@ -205,6 +205,7 @@ exercise on the axis this revision added.
 | File | What it is |
 |---|---|
 | [`ds-skills-explorer.html`](ds-skills-explorer.html) | **Interactive explorer.** Single self-contained file — no build, no dependencies. |
+| [`career-comparison.html`](career-comparison.html) | **Career comparison.** Your profile against the ten most common data-science careers; click a career to darken its line and shade its area. Career values are illustrative estimates, not part of the rubric. |
 | [`ds-skills-radar.svg`](ds-skills-radar.svg) | Standalone vector radar of the sample profile, hand-editable, sized for projection. |
 | [`make_svg.py`](make_svg.py) | Generator for the SVG. Skills, values, and clusters are a plain Python list at the top. Standard library only. |
 | [`skills-assessment.md`](skills-assessment.md) | The taxonomy: what changed and why, the 0–4 rung ladders, implications for the archetypes, and what was considered and set aside. |

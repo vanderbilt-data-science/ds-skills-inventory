@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills Radar — Career Comparison</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --row-alt: rgba(11,11,11,0.03);
+    --you: #0b0b0b;
+    --s1: #2a78d6; /* blue */
+    --s2: #eb6834; /* orange */
+    --s3: #1baf7a; /* aqua */
+    --s4: #eda100; /* yellow */
+    --s5: #e87ba4; /* magenta */
+    --s6: #008300; /* green */
+    --s7: #4a3aa7; /* violet */
+    --s8: #e34948; /* red */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --row-alt: rgba(255,255,255,0.04);
+      --you: #ffffff;
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+      --s4: #c98500;
+      --s5: #d55181;
+      --s6: #008300;
+      --s7: #9085e9;
+      --s8: #e66767;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --row-alt: rgba(255,255,255,0.04);
+    --you: #ffffff;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+    --s5: #d55181;
+    --s6: #008300;
+    --s7: #9085e9;
+    --s8: #e66767;
+  }
+  :root[data-theme="light"] .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --row-alt: rgba(11,11,11,0.03);
+    --you: #0b0b0b;
+    --s1: #2a78d6;
+    --s2: #eb6834;
+    --s3: #1baf7a;
+    --s4: #eda100;
+    --s5: #e87ba4;
+    --s6: #008300;
+    --s7: #4a3aa7;
+    --s8: #e34948;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  .viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { color: var(--text-secondary); font-size: 13.5px; margin-top: 4px; }
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; margin-top: 18px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .panel + .panel { margin-top: 16px; }
+  .panel h2 {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px;
+  }
+  input[type="text"] {
+    font: inherit; font-size: 13.5px;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; width: 100%;
+  }
+  .name-row { margin-bottom: 14px; }
+  .name-row label { font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 5px; }
+  .skill-row { display: grid; grid-template-columns: 1fr 110px 26px; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .skill-row .name { font-size: 12.5px; }
+  .skill-row .val { font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  input[type="range"] { width: 100%; accent-color: var(--you); }
+  .hint { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+  .career-toggles { display: flex; flex-direction: column; gap: 2px; }
+  .toggle-row {
+    display: flex; align-items: center; gap: 9px; padding: 7px 6px;
+    border-radius: 8px; cursor: pointer; font-size: 13px;
+    background: none; border: 1px solid transparent; width: 100%;
+    font: inherit; color: var(--text-secondary); text-align: left;
+  }
+  .toggle-row:hover { background: var(--row-alt); }
+  .toggle-row[aria-pressed="true"] { color: var(--text-primary); font-weight: 600; background: var(--row-alt); border-color: var(--border); }
+  .swatch { width: 16px; height: 4px; border-radius: 2px; flex: none; opacity: 0.55; }
+  .toggle-row[aria-pressed="true"] .swatch { opacity: 1; height: 5px; }
+  .swatch.dashed { background: none !important; border-top: 4px dashed; opacity: 0.7; }
+  .toggle-row[aria-pressed="true"] .swatch.dashed { border-top-width: 5px; opacity: 1; }
+  .toggle-row .label { flex: 1; }
+  .toggle-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .toggle-actions button {
+    font: inherit; font-size: 12px; background: none; color: var(--text-secondary);
+    border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; cursor: pointer;
+  }
+  .toggle-actions button:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .chart-panel { position: relative; }
+  #chart { width: 100%; height: auto; display: block; }
+  .tooltip {
+    position: absolute; pointer-events: none; display: none;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 11px; font-size: 12.5px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.16); z-index: 5; min-width: 190px;
+  }
+  .tooltip .t-axis { font-weight: 700; margin-bottom: 5px; }
+  .tooltip .t-row { display: flex; align-items: center; gap: 6px; padding: 1.5px 0; }
+  .tooltip .t-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .tooltip .t-name { flex: 1; color: var(--text-secondary); }
+  .tooltip .t-val { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .footnote { font-size: 12px; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+  .table-scroll { overflow-x: auto; margin-top: 16px; }
+  table { border-collapse: collapse; width: 100%; min-width: 1080px; font-size: 12.5px; }
+  th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { color: var(--text-secondary); font-weight: 600; font-size: 11.5px; }
+  thead th.you-col { color: var(--you); }
+  tbody th { font-weight: 500; color: var(--text-primary); }
+  td { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  td.you-col { color: var(--text-primary); font-weight: 700; }
+  tbody tr:hover { background: var(--row-alt); }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Skills Radar &mdash; Career Comparison</h1>
+    <p>Your profile against the ten most common data-science careers, on the same nine 2026 axes. Scale 0&ndash;4.</p>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>Your profile</h2>
+        <div class="name-row">
+          <label for="portraitName">Name</label>
+          <input type="text" id="portraitName" value="You">
+        </div>
+        <div id="sliders"></div>
+      </div>
+      <div class="panel">
+        <h2>Compare against</h2>
+        <p class="hint">Click a career to bring it forward in its full color. Click again to fade it back.</p>
+        <div class="career-toggles" id="toggles"></div>
+        <div class="toggle-actions">
+          <button id="emphasizeAll">Emphasize all</button>
+          <button id="clearAll">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-panel panel">
+      <svg id="chart" viewBox="0 0 1120 760" role="img" aria-label="Radar chart comparing your skill profile to ten data-science career archetypes"></svg>
+      <div class="tooltip" id="tooltip"></div>
+      <div class="footnote">
+        Career reference profiles are illustrative estimates for typical practitioners in each role &mdash;
+        not sourced from the repo's rubric, which defines only the six 2026 archetype presets (Guide,
+        Builder, Architect, Visionary, Toolmaker, Balanced DS). Research Scientist and Database
+        Administrator reuse the Data Scientist / Data Engineer hues with a dashed stroke (10 careers
+        exceed the 8-hue safe palette, so the last two are told apart by pattern, not a new color).
+        Hover an axis label to compare every emphasized profile at that point; full numbers are in the
+        table below.
+      </div>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table id="dataTable"></table>
+  </div>
+</div>
+
+<script>
+const SKILLS = [
+  { label: "Statistics & Modeling" },
+  { label: "AI Foundations" },
+  { label: "AI Agents & Frameworks" },
+  { label: "Programming" },
+  { label: "Data Engineering" },
+  { label: "Visualization" },
+  { label: "Communication" },
+  { label: "Storytelling" },
+  { label: "Domain Knowledge" },
+];
+// order matches SKILLS: [stats, aifound, agents, prog, dataeng, viz, comm, story, domain]
+let youValues = [1, 0.5, 0.5, 2, 0.5, 3, 3, 3, 1];
+
+// top 10 most common data-science careers; illustrative estimates, not from the repo's rubric
+const CAREERS = [
+  { name: "Data Scientist",              colorVar: "--s1", values: [3,   3,   3,   2,   2,   3,   3,   3,   2  ] },
+  { name: "Data Analyst",                colorVar: "--s2", values: [1.5, 1,   1,   1.5, 1.5, 3,   2.5, 2,   2  ] },
+  { name: "Data Engineer",               colorVar: "--s3", values: [1,   1,   1.5, 3.5, 4,   1,   1.5, 1,   1.5] },
+  { name: "Machine Learning Engineer",   colorVar: "--s4", values: [2.5, 3.5, 3,   4,   3,   1.5, 1.5, 1,   1.5] },
+  { name: "Statistician",                colorVar: "--s5", values: [4,   1.5, 1,   2,   1,   2.5, 2.5, 2,   2  ] },
+  { name: "Business Intelligence Analyst", colorVar: "--s6", values: [1.5, 1,   1,   1.5, 2.5, 3.5, 3,   2.5, 2.5] },
+  { name: "Data Architect",              colorVar: "--s7", values: [1,   1.5, 1.5, 3,   4,   1,   2,   1,   2  ] },
+  { name: "Business Analyst",            colorVar: "--s8", values: [1.5, 1,   1,   1,   1,   2.5, 3.5, 3,   3.5] },
+  { name: "Research Scientist",          colorVar: "--s1", dashed: true, values: [3.5, 4,   3,   3.5, 2,   2,   2.5, 1.5, 2  ] },
+  { name: "Database Administrator",      colorVar: "--s3", dashed: true, values: [0.5, 0.5, 1,   2.5, 3.5, 0.5, 1.5, 0.5, 1  ] },
+];
+CAREERS.forEach(c => c.emphasized = false);
+
+const N = SKILLS.length, CX = 545, CY = 380, R = 235, MAXV = 4;
+const svgNS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.querySelector(".viz-root")).getPropertyValue(v).trim();
+const angle = i => -Math.PI / 2 + 2 * Math.PI * i / N;
+const pt = (i, r) => [CX + r * Math.cos(angle(i)), CY + r * Math.sin(angle(i))];
+const el = (tag, attrs, parent) => {
+  const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+
+// darken a hex color toward black by `amt` (0..1) — used to shade in an emphasized career
+function darken(hex, amt) {
+  const n = parseInt(hex.replace("#", ""), 16);
+  const r = Math.round(((n >> 16) & 255) * (1 - amt));
+  const g = Math.round(((n >> 8) & 255) * (1 - amt));
+  const b = Math.round((n & 255) * (1 - amt));
+  return "#" + [r, g, b].map(x => Math.max(0, Math.min(255, x)).toString(16).padStart(2, "0")).join("");
+}
+
+// ---------------- your-profile sliders ----------------
+const slidersHost = document.getElementById("sliders");
+function buildSliders() {
+  slidersHost.innerHTML = "";
+  SKILLS.forEach((s, i) => {
+    const row = document.createElement("div");
+    row.className = "skill-row";
+    row.innerHTML =
+      `<span class="name">${s.label}</span>` +
+      `<input type="range" min="0" max="4" step="0.5" value="${youValues[i]}" data-idx="${i}" aria-label="${s.label}">` +
+      `<span class="val" id="val-${i}">${youValues[i]}</span>`;
+    slidersHost.appendChild(row);
+  });
+}
+slidersHost.addEventListener("input", e => {
+  if (e.target.type !== "range") return;
+  const i = +e.target.dataset.idx;
+  youValues[i] = +e.target.value;
+  document.getElementById("val-" + i).textContent = youValues[i];
+  draw();
+  buildTable();
+});
+
+// ---------------- career toggles (click to emphasize / darken) ----------------
+const togglesHost = document.getElementById("toggles");
+function buildToggles() {
+  togglesHost.innerHTML = "";
+  CAREERS.forEach((c, i) => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "toggle-row";
+    row.dataset.idx = i;
+    row.setAttribute("aria-pressed", c.emphasized ? "true" : "false");
+    row.innerHTML =
+      `<span class="swatch${c.dashed ? " dashed" : ""}" style="${c.dashed ? "border-color:var(" + c.colorVar + ")" : "background:var(" + c.colorVar + ")"}"></span>` +
+      `<span class="label">${c.name}</span>`;
+    row.addEventListener("click", () => {
+      c.emphasized = !c.emphasized;
+      row.setAttribute("aria-pressed", c.emphasized ? "true" : "false");
+      draw();
+    });
+    togglesHost.appendChild(row);
+  });
+}
+document.getElementById("emphasizeAll").addEventListener("click", () => {
+  CAREERS.forEach(c => c.emphasized = true);
+  buildToggles(); draw();
+});
+document.getElementById("clearAll").addEventListener("click", () => {
+  CAREERS.forEach(c => c.emphasized = false);
+  buildToggles(); draw();
+});
+
+// ---------------- chart ----------------
+const svg = document.getElementById("chart");
+
+function draw() {
+  svg.innerHTML = "";
+  el("text", { x: CX, y: 34, "text-anchor": "middle", "font-size": 24, "font-weight": 700,
+               fill: css("--text-primary"), "font-family": "system-ui, sans-serif" }, svg)
+    .textContent = "Skills Radar";
+
+  for (let v = 1; v <= MAXV; v++) {
+    el("circle", { cx: CX, cy: CY, r: R * v / MAXV, fill: "none",
+                   stroke: v === MAXV ? css("--axis") : css("--grid"), "stroke-width": 1 }, svg);
+    el("text", { x: CX + 12, y: CY - R * v / MAXV + 5, "font-size": 13,
+                 fill: css("--text-muted"), "font-family": "system-ui, sans-serif" }, svg).textContent = v;
+  }
+  for (let i = 0; i < N; i++) {
+    const [x, y] = pt(i, R);
+    el("line", { x1: CX, y1: CY, x2: x, y2: y, stroke: css("--grid"), "stroke-width": 1 }, svg);
+  }
+
+  // faded (not emphasized) careers first — background context
+  const drawCareer = c => {
+    const base = css(c.colorVar);
+    const color = c.emphasized ? darken(base, 0.35) : base;
+    const width = c.emphasized ? 3 : 1.5;
+    const opacity = c.emphasized ? 1 : 0.4;
+    const dotR = c.emphasized ? 4.5 : 2;
+    const pts = c.values.map((v, i) => pt(i, R * v / MAXV).join(",")).join(" ");
+    const attrs = { points: pts, fill: c.emphasized ? color : "none",
+                    "fill-opacity": c.emphasized ? 0.16 : 0,
+                    stroke: color, "stroke-width": width,
+                    "stroke-linejoin": "round", "stroke-opacity": opacity };
+    if (c.dashed) attrs["stroke-dasharray"] = "9 6";
+    el("polygon", attrs, svg);
+    c.values.forEach((v, i) => {
+      const [x, y] = pt(i, R * v / MAXV);
+      el("circle", { cx: x, cy: y, r: dotR, fill: color, "fill-opacity": opacity }, svg);
+    });
+  };
+  CAREERS.filter(c => !c.emphasized).forEach(drawCareer);
+  CAREERS.filter(c => c.emphasized).forEach(drawCareer);
+
+  // your profile (primary subject) — bold, filled, drawn on top
+  const youPts = youValues.map((v, i) => pt(i, R * v / MAXV).join(",")).join(" ");
+  el("polygon", { points: youPts, fill: css("--you"), "fill-opacity": 0.14,
+                  stroke: css("--you"), "stroke-width": 3, "stroke-linejoin": "round" }, svg);
+  youValues.forEach((v, i) => {
+    const [x, y] = pt(i, R * v / MAXV);
+    el("circle", { cx: x, cy: y, r: 4.5, fill: css("--you") }, svg);
+  });
+
+  // axis hit-targets + labels (hover shows every emphasized series for that axis)
+  SKILLS.forEach((s, i) => {
+    const a = angle(i), c = Math.cos(a), sn = Math.sin(a);
+    const lx = CX + (R + 30) * c, ly = CY + (R + 30) * sn;
+    let anchor = "middle";
+    if (c > 0.35) anchor = "start";
+    if (c < -0.35) anchor = "end";
+    let dy = 7;
+    if (sn < -0.85) dy = 0;
+    if (sn > 0.85) dy = 16;
+    const t = el("text", { x: lx, y: ly + dy, "text-anchor": anchor, "font-size": 18, "font-weight": 600,
+                           fill: css("--text-primary"), "font-family": "system-ui, sans-serif",
+                           style: "cursor:default" }, svg);
+    t.textContent = s.label;
+    t.addEventListener("mousemove", ev => showTip(ev, i));
+    t.addEventListener("mouseleave", hideTip);
+    const hit = el("rect", { x: lx - 70, y: ly - 12, width: 140, height: 26, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", ev => showTip(ev, i));
+    hit.addEventListener("mouseleave", hideTip);
+  });
+}
+
+// ---------------- tooltip ----------------
+const tip = document.getElementById("tooltip");
+function showTip(ev, axisIdx) {
+  const host = svg.parentElement.getBoundingClientRect();
+  let rows = `<div class="t-row"><span class="t-dot" style="background:${css('--you')}"></span>` +
+             `<span class="t-name">${document.getElementById('portraitName').value || 'You'}</span>` +
+             `<span class="t-val">${youValues[axisIdx]}</span></div>`;
+  const emphasized = CAREERS.filter(c => c.emphasized);
+  const list = emphasized.length ? emphasized : CAREERS;
+  list.forEach(c => {
+    const base = css(c.colorVar);
+    const color = c.emphasized ? darken(base, 0.35) : base;
+    rows += `<div class="t-row"><span class="t-dot" style="background:${color};opacity:${c.emphasized ? 1 : 0.55}"></span>` +
+            `<span class="t-name">${c.name}</span><span class="t-val">${c.values[axisIdx]}</span></div>`;
+  });
+  tip.innerHTML = `<div class="t-axis">${SKILLS[axisIdx].label}</div>${rows}`;
+  tip.style.display = "block";
+  tip.style.left = Math.min(ev.clientX - host.left + 14, host.width - 210) + "px";
+  tip.style.top = (ev.clientY - host.top - 10) + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+
+// ---------------- data table ----------------
+function buildTable() {
+  const table = document.getElementById("dataTable");
+  const name = document.getElementById("portraitName").value || "You";
+  let head = `<thead><tr><th>Axis</th><th class="you-col">${name}</th>` +
+             CAREERS.map(c => `<th>${c.name}</th>`).join("") + "</tr></thead>";
+  let body = "<tbody>" + SKILLS.map((s, i) =>
+    `<tr><th>${s.label}</th><td class="you-col">${youValues[i]}</td>` +
+    CAREERS.map(c => `<td>${c.values[i]}</td>`).join("") + "</tr>"
+  ).join("") + "</tbody>";
+  table.innerHTML = head + body;
+}
+document.getElementById("portraitName").addEventListener("input", () => buildTable());
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+
+buildSliders();
+buildToggles();
+draw();
+buildTable();
+</script>
+</body>
+</html>
