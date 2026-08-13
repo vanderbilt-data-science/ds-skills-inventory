@@ -90,71 +90,233 @@
 </div>
 
 <script>
-// ---------------- exam data (placeholder for now — full rubric content comes next commit) ----------------
-const QUESTIONS = [
+// ---------------- exam data (from skill-level-rubric.md §3) ----------------
+// AI Agents & Frameworks and Programming need special question flows (currency
+// decay, two dials) and are added in a later commit. This commit covers the
+// seven axes that are a plain 0-4 ladder.
+const STANDARD_AXES = [
   {
-    id: "demo",
-    text: "Placeholder question — confirms the exam shell works before real content is added.",
-    choices: [
-      { label: "Option A", value: 0 },
-      { label: "Option B", value: 1 },
-      { label: "Option C", value: 2 },
+    id: "stats", label: "Statistics & Modeling",
+    probe: "One course, two, or beyond into Bayesian? Can you build the model that holds everything else equal — so you can answer whether the campaign worked once seasonality and the acquisition are factored out?",
+    options: [
+      "Coursework or none. You can run a test or a regression when told which one to run.",
+      "One to two courses' worth. You have applied inferential statistics or regression to at least one real question. You pick the method with help and report effects more confidently than uncertainty.",
+      "You choose and defend the specification yourself on real questions — controlling confounds, handling seasonality and repeated measures, checking assumptions, reporting uncertainty honestly. Multiple regression and its extensions are comfortable; you have met Bayesian reasoning and can say what a prior is doing.",
+      "You use frequentist and Bayesian methods where each fits, and you design the study, not just the analysis — experiments, quasi-experimental designs, causal identification and its assumptions. Others bring you their designs before collecting data.",
+      "Research-grade. You develop or extend methods, publish or review, and are consulted on statistical questions beyond your organization."
+    ],
+  },
+  {
+    id: "aifound", label: "AI Foundations",
+    probe: "Could you explain a transformer to someone — and name a decision you would make differently because of what you understand?",
+    options: [
+      "You use models without a mechanistic account of them. Coursework only.",
+      "You have applied classical ML and off-the-shelf foundation models to real problems, and can explain the machinery at block-diagram level: tokens and embeddings, attention, next-token prediction, pre-training versus fine-tuning versus inference.",
+      "You are solid across the major method families and can name which instrument fits — foundation model, classical ML, statistical model, or no model at all. You run error analysis and basic evals and can explain why a model hallucinates.",
+      "Deep grasp of behavior and limits. You design evaluation suites; you know when adaptation (retrieval, fine-tuning, distillation) is worth it and when it isn't; you reason about distribution shift and silent degradation.",
+      "You advance the frontier — novel methods, research-grade work that others build on."
+    ],
+  },
+  {
+    id: "dataeng", label: "Data Engineering",
+    probe: "Have you ever gotten data all the way to a dashboard yourself?",
+    options: [
+      "No hands-on data access experience. Someone hands you a file.",
+      "You can get the data you need — SQL basics (AI-assisted is fine), APIs, file wrangling, warehouse queries. One-off extracts that you check.",
+      "Working knowledge of warehouses and lakes. You get grain and joins right, run data-quality checks before trusting anything. You can take data end to end by yourself.",
+      "You build pipelines and orchestration that survive without you — scheduling, idempotency, monitoring, lineage, quality at scale. You handle access, governance, and cost.",
+      "You design platforms — streaming, very large scale, specialized infrastructure."
+    ],
+  },
+  {
+    id: "viz", label: "Visualization",
+    probe: "Have you built something genuinely compelling for a real problem?",
+    options: [
+      "Default charts, chart type chosen by habit or by whatever the library did.",
+      "You make correct, readable charts for real work — right form for the data type, labels, units, and scales that don't mislead.",
+      "You design for perception and cognitive load: signal in a channel that pops (position, color) rather than one that has to be searched (shape). You design for color-vision deficiency and contrast.",
+      "You build visual systems — dashboards and interactive tools that hold up in real use, consistent encodings across a family of views, tuned to audience and medium.",
+      "Original visual forms or tooling that others adopt; recognized design work."
+    ],
+  },
+  {
+    id: "comm", label: "Communication",
+    probe: "Could you stand up in front of executives and defend it?",
+    options: [
+      "You report results informally, to peers, in the order you did the work.",
+      "You present clearly to a friendly technical audience and write a summary people can read.",
+      "You present to non-technical stakeholders and executives: you lead with the decision, state uncertainty honestly, and take hard questions without over-claiming.",
+      "You build the case and the coalition — negotiating scope, bringing IT, security, and legal in as collaborators. You are the person sent into the difficult room.",
+      "You shape the conversation beyond your organization — invited talks, published work, external authority."
+    ],
+  },
+  {
+    id: "story", label: "Storytelling",
+    probe: "Could you explain something complex to a non-technical audience as a story?",
+    options: [
+      "You recite findings in the order you produced them.",
+      "You structure a narrative — setup, tension, resolution — for a report or a talk.",
+      "You make genuinely complex material intuitive for a lay audience through concrete story, analogy, and example, without falsifying it.",
+      "You build the narrative that carries an initiative — the framing other people repeat back to you unprompted. You teach it.",
+      "Recognized communicator; your framing becomes the shorthand others use."
+    ],
+  },
+  {
+    id: "domain", label: "Domain Knowledge",
+    probe: "Is there a field you actually know?",
+    options: [
+      "None. You would need someone to tell you what the columns mean.",
+      "You know one domain's vocabulary and main processes well enough to follow a subject-matter expert and ask reasonable questions.",
+      "You know a domain well enough to ask the right question, to spot a number that cannot be true, and to challenge a stakeholder's framing.",
+      "The domain's own experts treat you as a peer. You understand incentives, politics, and what the numbers do to the people they describe.",
+      "You are an expert in the domain in your own right, independently of the data science."
     ],
   },
 ];
 
 // ---------------- state ----------------
-let step = 0;
-const answers = QUESTIONS.map(() => undefined);
+// position walks: axis[0].main -> axis[0].artifact -> axis[0].failure -> axis[1].main -> ...
+// (artifact/failure are skipped when the main answer is level 0 — nothing to verify)
+let axisIdx = 0;
+let sub = "main"; // "main" | "artifact" | "failure"
+let showResults = false;
+const history = [];
+const results = STANDARD_AXES.map(() => ({}));
 
 const host = document.getElementById("quizHost");
 const progressFill = document.getElementById("progressFill");
 const progressLabel = document.getElementById("progressLabel");
 
 function updateProgress() {
-  const total = QUESTIONS.length;
-  const done = Math.min(step, total - 1);
-  progressFill.style.width = (100 * done / Math.max(total - 1, 1)).toFixed(1) + "%";
-  progressLabel.textContent = `Question ${Math.min(step + 1, total)} of ${total}`;
+  const total = STANDARD_AXES.length;
+  const done = showResults ? total : axisIdx;
+  progressFill.style.width = (100 * done / total).toFixed(1) + "%";
+  progressLabel.textContent = showResults
+    ? "Results"
+    : `Axis ${axisIdx + 1} of ${total}: ${STANDARD_AXES[axisIdx].label}`;
+}
+
+function currentQuestion() {
+  const axis = STANDARD_AXES[axisIdx];
+  if (sub === "main") {
+    return {
+      text: `${axis.label} — ${axis.probe}`,
+      choices: axis.options.map((text, lvl) => ({ label: text, value: lvl })),
+      answerKey: "base",
+    };
+  }
+  if (sub === "artifact") {
+    return {
+      text: `For the level you just picked in ${axis.label}: can you name a specific artifact — a thing that exists and a person who used it (a repo, a dashboard someone opens, a talk with an audience)?`,
+      choices: [{ label: "Yes, I can name one", value: true }, { label: "No", value: false }],
+      answerKey: "artifact",
+    };
+  }
+  return {
+    text: `Still on ${axis.label}: can you describe how work at that level characteristically fails, and a specific time you caught it?`,
+    choices: [{ label: "Yes, I can describe one", value: true }, { label: "No", value: false }],
+    answerKey: "failure",
+  };
 }
 
 function render() {
   updateProgress();
   host.innerHTML = "";
-  const q = QUESTIONS[step];
+  if (showResults) { renderResults(); return; }
+
+  const q = currentQuestion();
+  const r = results[axisIdx];
   const panel = document.createElement("div");
   panel.className = "panel";
   panel.innerHTML = `<div class="q-title">${q.text}</div><div class="options" id="options"></div>`;
 
   const optionsHost = panel.querySelector("#options");
+  const current = r[q.answerKey];
   q.choices.forEach((choice, i) => {
     const row = document.createElement("label");
-    row.className = "option" + (answers[step] === choice.value ? " selected" : "");
-    row.innerHTML = `<input type="radio" name="choice" value="${choice.value}" ${answers[step] === choice.value ? "checked" : ""}>
+    row.className = "option" + (current === choice.value ? " selected" : "");
+    row.innerHTML = `<input type="radio" name="choice" ${current === choice.value ? "checked" : ""}>
       <span class="letter">${String.fromCharCode(65 + i)}.</span><span>${choice.label}</span>`;
-    row.addEventListener("click", () => { answers[step] = choice.value; render(); });
+    row.addEventListener("click", () => { r[q.answerKey] = choice.value; render(); });
     optionsHost.appendChild(row);
   });
 
   host.appendChild(panel);
-  host.appendChild(navBar());
+  host.appendChild(navBar(q));
 }
 
-function navBar() {
+function navBar(q) {
   const bar = document.createElement("div");
   bar.className = "nav";
   const back = document.createElement("button");
   back.textContent = "Back";
-  back.disabled = step === 0;
-  back.addEventListener("click", () => { step--; render(); });
+  back.disabled = history.length === 0;
+  back.addEventListener("click", goBack);
   const next = document.createElement("button");
   next.className = "primary";
-  next.textContent = step === QUESTIONS.length - 1 ? "See results" : "Next";
-  next.disabled = answers[step] === undefined;
-  next.addEventListener("click", () => { step++; render(); });
+  const isLast = axisIdx === STANDARD_AXES.length - 1 && (sub === "failure" || (sub === "main" && results[axisIdx].base === 0));
+  next.textContent = isLast ? "See results" : "Next";
+  next.disabled = results[axisIdx][q.answerKey] === undefined;
+  next.addEventListener("click", goNext);
   bar.appendChild(back);
   bar.appendChild(next);
   return bar;
+}
+
+function finalizeAxis(i) {
+  const r = results[i];
+  let level = r.base;
+  if (r.base > 0 && (r.artifact === false || r.failure === false)) level -= 0.5;
+  r.level = level;
+  r.confidence = r.base === 0 ? "n/a" : (r.artifact && r.failure ? "evidenced" : "estimated");
+}
+
+function goNext() {
+  history.push({ axisIdx, sub });
+  if (sub === "main") {
+    if (results[axisIdx].base === 0) {
+      finalizeAxis(axisIdx);
+      advanceAxis();
+    } else {
+      sub = "artifact";
+    }
+  } else if (sub === "artifact") {
+    sub = "failure";
+  } else {
+    finalizeAxis(axisIdx);
+    advanceAxis();
+  }
+  render();
+}
+
+function advanceAxis() {
+  axisIdx++;
+  sub = "main";
+  if (axisIdx >= STANDARD_AXES.length) showResults = true;
+}
+
+function goBack() {
+  if (history.length === 0) return;
+  const prev = history.pop();
+  axisIdx = prev.axisIdx;
+  sub = prev.sub;
+  showResults = false;
+  render();
+}
+
+// ---------------- results (placeholder table — portrait/export/archetype match come later) ----------------
+function renderResults() {
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  const rows = STANDARD_AXES.map((axis, i) =>
+    `<tr><td>${axis.label}</td><td>${results[i].level}</td><td>${results[i].confidence}</td></tr>`
+  ).join("");
+  panel.innerHTML = `<div class="q-title">Results so far</div>
+    <table style="width:100%; border-collapse:collapse; font-size:13px">
+      <thead><tr><th style="text-align:left; padding:6px">Axis</th><th style="text-align:left; padding:6px">Level</th><th style="text-align:left; padding:6px">Confidence</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  host.appendChild(panel);
 }
 
 render();
