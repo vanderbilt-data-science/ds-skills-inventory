@@ -4,10 +4,11 @@ description: >-
   nine axes, 0-4 rung ladders, and an interactive radar explorer.
 theme: jekyll-theme-primer
 
-# The explorer is a hand-written, self-contained page; Jekyll must copy it
-# through untouched rather than try to render it.
+# The explorer and the baseline test are hand-written, self-contained pages;
+# Jekyll must copy them through untouched rather than try to render them.
 include:
   - ds-skills-explorer.html
+  - baseline-skill-test.html
 
 exclude:
   - make_svg.py
