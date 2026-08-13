@@ -177,6 +177,15 @@ for all nine axes, an artifact rule that keeps the numbers honest, the
 verification cap on Programming, the currency-decay rule on AI Agents, and a
 portrait template to keep alongside your exported chart.
 
+For the guided pass: hit **Guided assessment**. It walks the nine axes one at a
+time, asks the rubric's own probe question, and offers answers written as
+behaviours rather than numbers — you never pick a level, you describe what you
+have done and the level follows. Programming asks twice, once for agentic
+delivery and once for unaided fluency, because the verification cap needs both
+dials. AI Agents also asks when you last did this for real, so the currency
+decay has a date to work from. The derived scores land on the sliders, which
+stay editable afterwards.
+
 For the quick pass: walk the nine sliders one at a time, ask an honest question
 per axis, and set the value:
 
@@ -194,11 +203,25 @@ Then keep the file. It's a single self-contained HTML page, so you can save your
 own copy, put your name on it, and re-run the assessment later to see the shape
 change.
 
-**An exercise, if you want one.** The explorer deliberately has no backend.
-Take it and build one: record each self-assessment with a timestamp, then play
-your profile back as a movie over the course of a program. Point an agent at
-this repo and build it the way *you* want it — which is, appropriately, an
-exercise on the axis this revision added.
+**Keeping the sequence.** Save a profile against a module — an intake baseline
+plus the end of each of the four modules, so five points across the year — and
+the explorer keeps them in your browser's local storage. Any past entry can be
+loaded back, or dropped onto the radar as the dashed comparison overlay. Once
+there are two, a per-axis trend appears below: nine small charts, one per axis,
+which is where the difference between the fast-rising axes and the last-mile
+ones actually becomes visible. The radar itself still shows at most two
+profiles, on purpose — see `vis-design-rationale.md`.
+
+The cohort's module dates live in one `MODULES` array at the top of the script;
+rolling the calendar forward a year is a single edit there.
+
+**Export it.** *Export JSON* writes the whole history to one file and *Import
+JSON* reads it back, so the sequence moves between machines, gets handed in with
+your exported SVGs, or survives clearing your browser. Import merges by entry
+id, so re-importing your own export is a no-op rather than a pile of duplicates.
+Nothing leaves your machine: there is still no backend, and there is
+deliberately no cross-student tracking — that would mean named self-assessments
+on a public site, which is a privacy decision before it is an architecture one.
 
 ## What's in the repo
 

@@ -502,9 +502,15 @@ much harder grader than you are.
 - **After any project that ended badly.** That is when the gaps are legible and
   the artifact rule is easy to apply.
 
-The explorer deliberately has no backend. Recording each assessment with a
-timestamp and playing your profile back as a movie over a program is left as an
-exercise — and it is, appropriately, an exercise on the axis this revision added.
+The explorer records this for you. Save each assessment against a module and it
+keeps the series locally — a baseline plus the end of each of the four modules —
+and draws the per-axis change once there are two points to draw. Export the
+history to JSON to move it between machines or hand it in. It still has no
+backend, and it still stores nothing about anyone but you.
+
+Two things the tool cannot do for you: it cannot tell whether you answered
+honestly, and it will not average your domains. The rules above are still the
+rules; the tool just stops you losing the sequence.
 
 ---
 
