@@ -106,6 +106,24 @@
   .tooltip .t-name { font-weight: 600; }
   .tooltip .t-val { color: var(--text-secondary); }
   .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .rubric-box {
+    margin-top: 14px; padding: 10px 12px; border-radius: 10px;
+    background: var(--page); border: 1px solid var(--border);
+    font-size: 12.5px; line-height: 1.45; color: var(--text-secondary);
+  }
+  .rubric-box .r-head { font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+  .rubric-box .r-hint { color: var(--text-muted); font-style: italic; }
+  .history-panel { margin-top: 14px; display: none; }
+  .history-panel.open { display: block; }
+  .history-row {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12.5px;
+  }
+  .history-row:last-child { border-bottom: none; }
+  .history-row .h-meta { color: var(--text-secondary); }
+  .history-row .h-meta .h-name { color: var(--text-primary); font-weight: 600; }
+  .history-row button { font-size: 11.5px; padding: 4px 8px; }
+  .history-empty { font-size: 12.5px; color: var(--text-muted); font-style: italic; }
 </style>
 </head>
 <body class="viz-root">
@@ -128,10 +146,16 @@
     <button id="downloadSvg">Download SVG</button>
     <button id="downloadPng">Download PNG</button>
     <button id="copyValues">Copy values</button>
+    <button id="saveSnapshot">Save snapshot</button>
+    <button id="toggleHistory">History</button>
   </div>
 
   <div class="layout">
-    <div class="panel" id="sliders"></div>
+    <div class="panel" id="sliderPanel">
+      <div id="sliders"></div>
+      <div class="rubric-box" id="rubricBox"><span class="r-hint">Hover or drag a slider to see the rubric for that level.</span></div>
+      <div class="panel history-panel" id="historyPanel"></div>
+    </div>
     <div class="panel chart-panel">
       <svg id="chart" viewBox="0 0 1120 700" role="img" aria-label="Radar chart of skill levels"></svg>
       <div class="legend" id="legend"></div>
@@ -174,6 +198,73 @@ const PRESETS = {
 const N = SKILLS.length, CX = 545, CY = 360, R = 235, MAXV = 4;
 let values = PRESETS["Balanced 2026 DS"].slice();
 
+// condensed from the "You are here when" tables in skill-level-rubric.md — keep in sync by hand
+const RUBRIC = {
+  stats: [
+    "Coursework or none — you run a test/regression when told which one.",
+    "Applied inferential stats or regression to a real question, with help choosing the method.",
+    "You choose and defend the specification yourself — confounds, assumptions, honest uncertainty.",
+    "You design the study, not just the analysis, and use Bayesian and frequentist methods where each fits.",
+    "Research-grade — you develop or extend methods and are consulted beyond your organization.",
+  ],
+  aifound: [
+    "You use models without a mechanistic account of them.",
+    "Applied classical ML / off-the-shelf foundation models; explain the machinery at block-diagram level.",
+    "You know which instrument fits and why a model hallucinates; decisions cite mechanism, not vibes.",
+    "You design evaluation suites and reason about distribution shift, adaptation trade-offs, and responsible-AI risk.",
+    "You advance the frontier with novel, research-grade work.",
+  ],
+  agents: [
+    "Chat-style use only — you paste a question in and copy an answer out.",
+    "Productive daily delegation: you write specifications, keep durable context, review everything that comes back.",
+    "You build capability, not just output — reusable Agent Skills, MCP connections, verification in the loop.",
+    "You design systems of agents — orchestration, evals, guardrails, cost/latency budgets, supervised long-running work.",
+    "You create novel agent architectures or standards others adopt.",
+  ],
+  prog: [
+    "No agentic delivery, no unaided fluency.",
+    "Scripts/notebooks via an agent you can follow and modify; one language you can read and change.",
+    "Multi-file projects with tests and a real git workflow; two+ languages or real depth — you were who others brought bugs to.",
+    "Production-grade systems you architect and defend; you design and write non-trivial software by hand.",
+    "Systems/standards other builders adopt; expert-engineer tier.",
+  ],
+  dataeng: [
+    "No hands-on data access experience — someone hands you a file.",
+    "You get the data you need — SQL basics, APIs, file wrangling — one-off extracts you check.",
+    "You take data end to end, source to dashboard or model input, and run quality checks before trusting anything.",
+    "You build pipelines and orchestration that survive without you — scheduling, monitoring, lineage, governance.",
+    "You design platforms — streaming, very large scale, specialized infrastructure.",
+  ],
+  viz: [
+    "Default charts, chosen by habit or library default.",
+    "Correct, readable charts — right form, labels, units, honest scales.",
+    "You design for perception and cognitive load, and for color-vision deficiency — color never carries meaning alone.",
+    "You build visual systems — dashboards and tools that hold up in real use, tuned to audience and medium.",
+    "Original visual forms or tooling that others adopt.",
+  ],
+  comm: [
+    "You report results informally, to peers, in the order you did the work.",
+    "You present clearly to a friendly technical audience and write a readable summary.",
+    "You present to executives: lead with the decision, state uncertainty honestly, take hard questions.",
+    "You build the case and the coalition — bringing IT, security, and legal in as partners to get things adopted.",
+    "You shape the conversation beyond your organization.",
+  ],
+  story: [
+    "You recite findings in the order you produced them.",
+    "You structure a narrative — setup, tension, resolution — for a report or talk.",
+    "You make complex material intuitive for a lay audience through concrete story and analogy, without falsifying it.",
+    "You build the narrative that carries an initiative — framing others repeat back to you unprompted.",
+    "Recognized communicator; your framing becomes the shorthand others use.",
+  ],
+  domain: [
+    "None — you'd need someone to tell you what the columns mean.",
+    "You know one domain's vocabulary and processes well enough to follow an expert and ask reasonable questions.",
+    "You know a domain well enough to ask the right question and challenge a stakeholder's framing.",
+    "The domain's own experts treat you as a peer; you understand incentives and regulatory depth.",
+    "You are an expert in the domain in your own right, independently of the data science.",
+  ],
+};
+
 // ---------------- helpers ----------------
 const svgNS = "http://www.w3.org/2000/svg";
 const css = v => getComputedStyle(document.body).getPropertyValue(v).trim();
@@ -213,8 +304,26 @@ function buildSliders() {
     values[i] = +e.target.value;
     document.getElementById("val-" + i).textContent = values[i];
     document.getElementById("preset").value = "Custom";
+    showRubric(i);
     draw();
   });
+  slidersHost.addEventListener("focusin", e => {
+    if (e.target.type !== "range") return;
+    showRubric(+e.target.dataset.idx);
+  });
+}
+
+// ---------------- rubric box ----------------
+function showRubric(i) {
+  const box = document.getElementById("rubricBox");
+  const s = SKILLS[i];
+  const blurbs = RUBRIC[s.id];
+  if (!blurbs) { box.innerHTML = '<span class="r-hint">No rubric text for this axis yet.</span>'; return; }
+  const v = values[i];
+  const lvl = Math.min(4, Math.floor(v));
+  const half = v - lvl === 0.5;
+  box.innerHTML = `<div class="r-head">${s.label} — Level ${v}${half ? ' <span class="r-hint">(half step toward next)</span>' : ''}</div>` +
+                   `<div>${blurbs[lvl]}</div>`;
 }
 
 // ---------------- chart ----------------
@@ -281,11 +390,11 @@ function draw() {
 
 function drawLegend() {
   const lg = document.getElementById("legend");
-  const compareName = document.getElementById("compare").value;
   let html = `<span class="key"><span class="swatch" style="background:var(--series-1)"></span>` +
              `${document.getElementById("portraitName").value || "Data Scientist"}</span>`;
   if (compareValues) {
-    html += `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${compareName}</span>`;
+    const opt = compareSel.options[compareSel.selectedIndex];
+    html += `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${opt ? opt.textContent : ""}</span>`;
   }
   lg.innerHTML = html;
 }
@@ -300,6 +409,7 @@ function showTip(ev, i) {
   tip.innerHTML = html;
   tip.style.left = (ev.clientX - host.left + 14) + "px";
   tip.style.top = (ev.clientY - host.top - 10) + "px";
+  showRubric(i);
 }
 function hideTip() { tip.style.display = "none"; }
 
@@ -311,31 +421,116 @@ Object.keys(PRESETS).forEach(name => {
   if (name !== "Custom") compareSel.add(new Option(name, name));
 });
 compareSel.add(new Option("None", "None"), 0);
+const historyOptgroup = document.createElement("optgroup");
+historyOptgroup.label = "My history";
+compareSel.appendChild(historyOptgroup);
 compareSel.value = "None";
 presetSel.value = "Balanced 2026 DS";
 
-presetSel.addEventListener("change", () => {
-  const p = PRESETS[presetSel.value];
-  if (!p) return;
-  values = p.slice();
+function applyValues(newValues) {
+  values = newValues.slice();
   document.querySelectorAll('#sliders input[type="range"]').forEach(sl => {
     sl.value = values[+sl.dataset.idx];
     document.getElementById("val-" + sl.dataset.idx).textContent = values[+sl.dataset.idx];
   });
+  draw();
+}
+
+presetSel.addEventListener("change", () => {
+  const p = PRESETS[presetSel.value];
+  if (!p) return;
+  applyValues(p);
   if (presetSel.value !== "Custom") {
     const nameBox = document.getElementById("portraitName");
     if (!nameBox.dataset.userEdited) nameBox.value = presetSel.value;
   }
-  draw();
 });
 compareSel.addEventListener("change", () => {
-  compareValues = compareSel.value === "None" ? null : PRESETS[compareSel.value].slice();
+  if (compareSel.value === "None") {
+    compareValues = null;
+  } else if (compareSel.value.startsWith("hist:")) {
+    const snap = loadSnapshots().find(s => s.id === compareSel.value.slice(5));
+    compareValues = snap ? snap.values.slice() : null;
+  } else {
+    compareValues = PRESETS[compareSel.value].slice();
+  }
   draw();
 });
 document.getElementById("portraitName").addEventListener("input", e => {
   e.target.dataset.userEdited = "1";
   draw();
 });
+
+// ---------------- history (localStorage) ----------------
+const HISTORY_KEY = "dsSkillsSnapshots";
+function loadSnapshots() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+  catch (e) { return []; }
+}
+function persistSnapshots(list) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+}
+function refreshHistoryUI() {
+  const snaps = loadSnapshots();
+
+  const prevValue = compareSel.value;
+  historyOptgroup.innerHTML = "";
+  snaps.forEach(s => {
+    historyOptgroup.appendChild(new Option(`${s.date} — ${s.name}`, "hist:" + s.id));
+  });
+  if ([...compareSel.options].some(o => o.value === prevValue)) compareSel.value = prevValue;
+  else { compareSel.value = "None"; compareValues = null; }
+
+  const panel = document.getElementById("historyPanel");
+  if (!snaps.length) {
+    panel.innerHTML = '<div class="history-empty">No saved snapshots yet. Use "Save snapshot" to start tracking progress over time.</div>';
+    return;
+  }
+  panel.innerHTML = "";
+  snaps.slice().reverse().forEach(s => {
+    const row = document.createElement("div");
+    row.className = "history-row";
+    row.innerHTML =
+      `<span class="h-meta"><span class="h-name">${s.name}</span> — ${s.date}</span>` +
+      `<button data-act="load" data-id="${s.id}">Load</button>` +
+      `<button data-act="delete" data-id="${s.id}">Delete</button>`;
+    panel.appendChild(row);
+  });
+}
+document.getElementById("historyPanel").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const snaps = loadSnapshots();
+  if (btn.dataset.act === "load") {
+    const snap = snaps.find(s => s.id === id);
+    if (!snap) return;
+    applyValues(snap.values);
+    presetSel.value = "Custom";
+    const nameBox = document.getElementById("portraitName");
+    nameBox.value = snap.name;
+    nameBox.dataset.userEdited = "1";
+    draw();
+  } else if (btn.dataset.act === "delete") {
+    persistSnapshots(snaps.filter(s => s.id !== id));
+    refreshHistoryUI();
+  }
+});
+document.getElementById("saveSnapshot").addEventListener("click", () => {
+  const snaps = loadSnapshots();
+  snaps.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name: document.getElementById("portraitName").value || "Data Scientist",
+    date: new Date().toISOString().slice(0, 10),
+    values: values.slice(),
+  });
+  persistSnapshots(snaps);
+  refreshHistoryUI();
+});
+document.getElementById("toggleHistory").addEventListener("click", () => {
+  document.getElementById("historyPanel").classList.toggle("open");
+});
+refreshHistoryUI();
 
 // ---------------- export ----------------
 function standaloneSvg() {
