@@ -226,6 +226,11 @@ dependencies, so it works offline and off a USB stick.
   team today against what the next stage would require.
 - **Export** downloads the current chart as SVG (vector, editable) or PNG
   (paste into slides), and "Copy values" gives you the raw numbers.
+- **Notes & goals** is a free-text panel below the chart for tracking your own
+  progress — what you want to improve next, why you picked a particular score,
+  goals for next quarter. It autosaves to your browser's local storage as you
+  type, so it's still there next time you open the same file in the same
+  browser, and it's included whenever you use "Copy values".
 - **Light and dark** are both hand-tuned; the chart follows your OS theme.
 
 ## Editing the graphics
