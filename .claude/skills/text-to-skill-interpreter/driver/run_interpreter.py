@@ -40,6 +40,7 @@ INPUT_FILE = DRIVER_DIR / "input.txt"
 OUTPUT_FILE = DRIVER_DIR / "output.txt"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 RUBRIC_FILE = REPO_ROOT / "skill-level-rubric.md"
+SCHEMA_FILE = SKILL_DIR / "schema" / "observation-log.schema.json"
 TIMEOUT_SECONDS = 300
 
 
@@ -60,10 +61,14 @@ def get_narrative():
 def build_prompt(narrative):
     skill_instructions = SKILL_FILE.read_text()
     rubric = RUBRIC_FILE.read_text()
+    schema = SCHEMA_FILE.read_text()
     return f"""You are running the text-to-skill-interpreter skill as a one-shot,
 non-interactive demo. Follow the skill's procedure exactly and rely only on
 the material below -- do not read or write any files, you have been given
-everything you need as text.
+everything you need as text. The JSON you produce must validate against the
+schema below exactly: field names, enum values (including every string in
+`rules_applied`), and the half-step (multiple of 0.5) constraint on every
+score are all enforced there, not just described in prose.
 
 ===== SKILL.md =====
 {skill_instructions}
@@ -71,12 +76,17 @@ everything you need as text.
 ===== skill-level-rubric.md =====
 {rubric}
 
+===== observation-log.schema.json =====
+{schema}
+
 ===== NARRATIVE TO INTERPRET =====
 {narrative}
 ===== END NARRATIVE =====
 
 Produce, as your entire reply:
-1. The JSON observation log described in the skill (matching its schema).
+1. The JSON observation log described in the skill (matching the schema
+   above exactly -- re-check every score is a multiple of 0.5 and every
+   rules_applied entry is one of the schema's enum values before answering).
 2. Then the short plain-text summary described in the skill's step 8.
 Nothing else -- no preamble, no offer to do more.
 """

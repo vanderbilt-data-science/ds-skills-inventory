@@ -74,6 +74,18 @@ level.
      domain → Domain Knowledge 1, not higher). Quote the rubric's own
      miscalibration line in `rationale` when it applies — it's the sharpest
      available justification.
+   - **Round every reported score to the nearest half step** (0, 0.5, 1,
+     ..., 4). This matters most for the Programming formula in step 4, whose
+     raw arithmetic (a mean of two dials) routinely lands off the half-step
+     grid — e.g. `min(mean(2, 1.5), 2.5) = 1.75` is not a valid
+     `observed_level`; report `1.5`, and say in `rationale` that you rounded
+     down rather than up when the evidence doesn't independently support the
+     higher half.
+   - **Use exactly these tokens in `rules_applied`** — no others, no
+     variations: `artifact_rule`, `failure_mode_rule`, `outsider_rule`,
+     `half_step`, `verification_cap`, `currency_decay`. (For the Programming
+     axis specifically, tag `verification_cap` whenever the `min(mean(A,B),
+     B+1)` formula is what determined the score.)
 3. **Set confidence**, independent of the level:
    - `high` — a specific, checkable artifact and a specific failure caught.
    - `medium` — a named artifact but no failure mode, or vice versa.
