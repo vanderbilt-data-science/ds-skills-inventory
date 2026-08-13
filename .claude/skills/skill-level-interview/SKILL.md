@@ -14,8 +14,9 @@ applying them through conversation instead of a self-scored worksheet.
 
 ## Status
 
-Scaffold only. Sections below are being filled in incrementally (see the
-project's task list / issue #16) — do not treat gaps as finished behavior.
+All four sections are drafted and the results-page generator is
+smoke-tested. Not yet run through a real end-to-end interview — see issue
+#16 for progress.
 
 ## 1. Interview flow
 
