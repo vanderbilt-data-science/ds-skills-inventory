@@ -89,9 +89,60 @@ Programming dials) before you move to scoring.
 
 ## 2. Scoring
 
-TODO (task #3): map transcript evidence to a 0-4 half-step score per axis,
-then apply the two §4 adjustments (Programming verification cap, AI Agents
-currency decay).
+For each axis, finalize the tentative score from the interview log against
+the ladder text in `skill-level-rubric.md` §3 — re-read the rows for that
+axis now rather than relying on memory of how the conversation felt.
+
+### Placing the number
+
+- Start from the highest level where the evidence log actually clears the
+  bar: the ladder's "you are here when" text is satisfied, and for level ≥1
+  a real artifact was named.
+- Drop to the half step below when the evidence is real but not yet
+  independent or consistent — the same half-step rule used live in the
+  interview.
+- If the person's own framing outran their evidence — confident language,
+  no artifact, no failure story — place at the level the evidence supports,
+  not the level they implied. This is where the ceiling illusion gets
+  corrected; it has to happen here, after the conversation, because
+  correcting it live would have told them what you were scoring for.
+- Carry the `evidenced` / `estimated` tag through unchanged. Don't upgrade
+  it just because you're now more confident in your own read — that tag
+  describes the evidence, not your conclusion.
+
+### The two §4 adjustments
+
+Apply these only after every axis has a base score, using the rubric's own
+§4 formulas.
+
+**Programming.** Combine the interview's two dial scores:
+`axis = min(mean(A, B), B + 1)`. Report the combined number as the axis
+score, but keep A and B individually in the notes — "agentic delivery is a
+4, unaided fluency is a 1" and a flat "2" are the same number and a
+completely different story, and the next-steps section (§4 below) needs the
+real one.
+
+**AI Agents & Frameworks.** Using the recency answer gathered in the
+interview, subtract 0.5 for every six months since their last sustained
+hands-on period with current tooling, floored at 1 if they were ever at 2 or
+above. No decay if they're currently active. Record the raw, pre-decay score
+in the notes too — "you're rusty" and "you never got here" call for
+different next steps.
+
+### Output of this phase
+
+A finalized nine-value vector, in the axis order
+`[stats, aifound, agents, prog, dataeng, viz, comm, story, domain]` (matches
+the rubric's §6 archetype-vector order), where each axis carries:
+
+- the score (half-steps allowed)
+- `evidenced` or `estimated`
+- a one-line rationale — the artifact, or the named absence of one
+- for Programming and AI Agents specifically, the pre-adjustment components
+  (A/B, or the raw pre-decay score)
+
+This vector is what archetype matching and the results page (§3 and §4
+below) consume.
 
 ## 3. Archetype matching
 
