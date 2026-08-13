@@ -175,5 +175,34 @@ the useful sentence, not "you're a Builder."
 
 ## 4. Producing results
 
-TODO (task #5): hand off the scored vector to a results page — radar chart,
-archetype match, per-axis next-step notes.
+Assemble the finalized data from §2 (Scoring) and §3 (Archetype matching)
+into the JSON shape documented in `scripts/render_results.py`'s docstring —
+nine axes in the fixed order, each axis carrying its score, its
+`evidenced`/`estimated` tag, a one-line rationale, and a next-step note (see
+below) — plus the archetype match. Then run:
+
+```
+python3 scripts/render_results.py <input.json> <output.html>
+```
+
+This calls `render_radar_svg()` from the repo's `make_svg.py` (the same
+function that draws the site's own chart, see the `make_svg.py` refactor)
+and writes a standalone, self-contained results page: radar, archetype
+match, and a per-axis notes table.
+
+### Writing the next-step note
+
+For each axis, name the single most useful thing to do next — concretely,
+the gap between what the evidence log showed and the next rung's "you are
+here when" text in `skill-level-rubric.md` §3. "Ship one Skill someone else
+installs" beats "get better at agents." If the axis is `estimated` rather
+than `evidenced`, the honest next step is often just naming the artifact
+that's missing, not a bigger ambition.
+
+### Handing it back
+
+Once the page is written, hand the file to the person directly — attach or
+send it rather than only describing it in chat, since the radar chart is the
+point of this whole exercise. If the running environment has no file-delivery
+mechanism, at minimum give them the file path and read the notes table back
+to them in the conversation.
