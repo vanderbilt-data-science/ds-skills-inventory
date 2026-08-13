@@ -1,0 +1,52 @@
+{
+  "session": {
+    "date": "2026-08-13",
+    "subject_id": "example-student",
+    "source_type": "mock_interview_qa",
+    "baseline_portrait_ref": "portraits/example-student-2026-05-01.yaml"
+  },
+  "observations": [
+    {
+      "axis": "agents",
+      "observed_level": 1.5,
+      "confidence": "medium",
+      "evidence_snippet": "I wrote a spec for the migration script -- goal, constraints, what counts as done -- and reviewed the diff before merging it. I've been doing that most weeks since June.",
+      "rules_applied": ["artifact_rule", "half_step"],
+      "rationale": "Names a real artifact (the migration script) and describes writing specs rather than requests, which clears level 1. No described verification-in-the-loop step (an eval, an expected count) or a reusable Skill someone else used, so it falls short of independent level 2; the recurring cadence ('most weeks since June') earns the half step over a one-off."
+    },
+    {
+      "axis": "prog",
+      "observed_level": 1.5,
+      "confidence": "medium",
+      "evidence_snippet": "Most of what I ship goes through the agent now -- multi-file changes with tests. If something breaks I can usually find it by reading the diff, but I wouldn't say I'd write the data layer from scratch anymore.",
+      "rules_applied": ["verification_cap", "half_step"],
+      "rationale": "Dial A (agentic delivery): 'multi-file changes with tests' matches level 2 directly. Dial B (unaided fluency): can read unfamiliar code and locate bugs (level 2 language) but explicitly disclaims writing non-trivial software by hand, so held at 1.5. axis = min(mean(2, 1.5), 1.5+1) = min(1.75, 2.5) = 1.75, rounded down to the nearest half step (1.5) since the evidence doesn't independently support the higher half yet -- consistent with the rubric's bias toward the conservative number."
+    },
+    {
+      "axis": "dataeng",
+      "observed_level": 2.0,
+      "confidence": "high",
+      "evidence_snippet": "I got the enrollment data all the way from the raw export to the dashboard the advising office actually uses -- I caught a grain problem where transfer students were being double-counted before it shipped.",
+      "rules_applied": ["artifact_rule", "failure_mode_rule"],
+      "rationale": "Named artifact (the advising dashboard, in real use) plus a specific failure mode caught (a grain/double-counting bug) before it reached a stakeholder. Matches level 2's 'source to dashboard... by yourself' and the rubric's failure-mode rule directly."
+    },
+    {
+      "axis": "comm",
+      "observed_level": 1.0,
+      "confidence": "low",
+      "evidence_snippet": "I think I could present that to non-technical people if I had to.",
+      "rules_applied": ["outsider_rule"],
+      "rationale": "Hypothetical ('if I had to'), not a described instance. Fails the outsider rule -- a colleague from last quarter could not confirm this happened. Capped at level 1 (friendly technical audience, the level actually evidenced elsewhere in the transcript) rather than the level 2 the subject implied."
+    }
+  ],
+  "adjustments": [
+    {
+      "axis": "dataeng",
+      "baseline_score": 1.5,
+      "proposed_score": 2.0,
+      "delta": 0.5,
+      "reason": "High-confidence observation with both a named artifact and a caught failure mode; half-step rise from the 2026-05-01 baseline is well supported."
+    }
+  ],
+  "insufficient_evidence": ["stats", "aifound", "viz", "story", "domain"]
+}

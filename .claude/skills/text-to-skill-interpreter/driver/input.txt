@@ -1,0 +1,9 @@
+I wrote a spec for the migration script -- goal, constraints, what counts as
+done -- and reviewed the diff before merging it. I've been doing that most
+weeks since June. Most of what I ship goes through the agent now, multi-file
+changes with tests. If something breaks I can usually find it by reading the
+diff, but I wouldn't say I'd write the data layer from scratch anymore. I got
+the enrollment data all the way from the raw export to the dashboard the
+advising office actually uses, and I caught a grain problem where transfer
+students were being double-counted before it shipped. I think I could present
+that to non-technical people if I had to.

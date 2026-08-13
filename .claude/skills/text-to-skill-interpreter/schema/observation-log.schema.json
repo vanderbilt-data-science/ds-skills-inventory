@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/vanderbilt-data-science/ds-skills-inventory/text-to-skill-interpreter/observation-log.schema.json",
+  "title": "Text-to-Skill Interpreter Observation Log",
+  "description": "Structured output of the text-to-skill-interpreter skill (issue #17): per-axis observations extracted from narrative text, evaluated against skill-level-rubric.md, plus proposed adjustments to a baseline portrait.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["session", "observations"],
+  "definitions": {
+    "axis": {
+      "type": "string",
+      "enum": ["stats", "aifound", "agents", "prog", "dataeng", "viz", "comm", "story", "domain"],
+      "description": "Axis key, matching the portrait template in skill-level-rubric.md section 6."
+    },
+    "level": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 4,
+      "multipleOf": 0.5
+    }
+  },
+  "properties": {
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "subject_id", "source_type"],
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the narrative text was collected, YYYY-MM-DD."
+        },
+        "subject_id": {
+          "type": "string",
+          "description": "Name or identifier of the person being assessed."
+        },
+        "source_type": {
+          "type": "string",
+          "enum": ["interview_transcript", "written_reflection", "mock_interview_qa"]
+        },
+        "baseline_portrait_ref": {
+          "type": ["string", "null"],
+          "description": "Path, id, or timestamp of the prior portrait this session adjusts, if any."
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["axis", "observed_level", "confidence", "evidence_snippet", "rules_applied"],
+        "properties": {
+          "axis": { "$ref": "#/definitions/axis" },
+          "observed_level": { "$ref": "#/definitions/level" },
+          "confidence": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "evidence_snippet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Verbatim or near-verbatim quote from the source text that the level is anchored to."
+          },
+          "rules_applied": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "artifact_rule",
+                "failure_mode_rule",
+                "outsider_rule",
+                "half_step",
+                "verification_cap",
+                "currency_decay"
+              ]
+            },
+            "minItems": 1
+          },
+          "rationale": {
+            "type": "string",
+            "description": "One or two sentences: why this level, not one above or below."
+          }
+        }
+      }
+    },
+    "adjustments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["axis", "baseline_score", "proposed_score", "delta"],
+        "properties": {
+          "axis": { "$ref": "#/definitions/axis" },
+          "baseline_score": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 4
+          },
+          "proposed_score": { "$ref": "#/definitions/level" },
+          "delta": {
+            "type": "number",
+            "description": "proposed_score - baseline_score. Omit adjustments where confidence is low and abs(delta) > 0.5."
+          },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "insufficient_evidence": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/axis" },
+      "description": "Axes the text touched but did not supply enough evidence (named artifact or failure mode) to score."
+    }
+  }
+}
