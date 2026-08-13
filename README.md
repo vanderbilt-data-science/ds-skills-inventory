@@ -210,6 +210,7 @@ exercise on the axis this revision added.
 | [`skills-assessment.md`](skills-assessment.md) | The taxonomy: what changed and why, the 0–4 rung ladders, implications for the archetypes, and what was considered and set aside. |
 | [`skill-level-rubric.md`](skill-level-rubric.md) | **The rating rubric.** Behaviorally anchored 0–4 ladders for all nine axes, calibration rules, and the procedure for turning nine numbers into a portrait. |
 | [`vis-design-rationale.md`](vis-design-rationale.md) | Why the visualization looks and behaves the way it does — including an honest accounting of radar charts' weaknesses and how each is managed. |
+| [`.claude/skills/add-axis/`](.claude/skills/add-axis/SKILL.md) | A Claude Code skill (`/add-axis`) that adds a new axis or cluster end-to-end — data files, regenerated SVG, prose — then branches, commits, pushes, and opens a PR. |
 
 ## Using the explorer
 
@@ -243,6 +244,13 @@ Edit the `SKILLS` and `CLUSTERS` lists at the top of `make_svg.py` to change
 axes, values, or cluster colors. The explorer mirrors this: its `SKILLS` and
 `PRESETS` arrays are the single place axes and archetypes are defined, and
 everything else derives from them.
+
+**Adding a whole new axis or cluster** touches both files' positional data plus
+the axis-count prose in several markdown files — easy to get subtly wrong by
+hand. If you're working in Claude Code, run `/add-axis` (see
+[`.claude/skills/add-axis/`](.claude/skills/add-axis/SKILL.md)): it edits both
+data files with an invariant-checking script, regenerates the SVG, updates the
+prose, and opens a PR.
 
 ## Design notes worth knowing
 
