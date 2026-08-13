@@ -61,7 +61,7 @@
     margin: 16px 0;
   }
   .toolbar label { font-size: 12.5px; color: var(--text-secondary); }
-  select, button, input[type="text"] {
+  select, button, input[type="text"], input[type="password"] {
     font: inherit; font-size: 13.5px;
     background: var(--surface-1); color: var(--text-primary);
     border: 1px solid var(--border); border-radius: 8px;
@@ -106,6 +106,21 @@
   .tooltip .t-name { font-weight: 600; }
   .tooltip .t-val { color: var(--text-secondary); }
   .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .next-steps-panel { margin-top: 20px; }
+  .next-steps-panel h2 { font-size: 15px; margin-bottom: 4px; }
+  .next-steps-panel .sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 14px; }
+  .key-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .key-row input[type="password"] { min-width: 260px; flex: 1 1 260px; }
+  .key-note { font-size: 11.5px; color: var(--text-muted); margin-top: -6px; margin-bottom: 14px; }
+  .steps-status { font-size: 13px; color: var(--text-secondary); margin: 6px 0 12px; min-height: 1.2em; }
+  .steps-status.error { color: var(--c-aiera); }
+  .steps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .step-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--page); }
+  .step-card h4 { font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .step-card .lvl { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .step-card p { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px; }
+  .step-card .resource { font-size: 12px; color: var(--text-primary); }
+  .step-card .resource b { font-weight: 600; }
 </style>
 </head>
 <body class="viz-root">
@@ -138,6 +153,20 @@
       <div class="tooltip" id="tooltip"></div>
       <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Values are also listed beside each slider.</div>
     </div>
+  </div>
+
+  <div class="panel next-steps-panel">
+    <h2>Next steps</h2>
+    <p class="sub">Get AI-generated, actionable next steps per axis — grounded in <a href="skill-level-rubric.md">skill-level-rubric.md</a>'s rung ladders — for the portrait currently plotted above.</p>
+    <div class="key-row">
+      <label>Anthropic API key
+        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" aria-label="Anthropic API key">
+      </label>
+      <button id="getNextSteps">Get next steps</button>
+    </div>
+    <p class="key-note">Your key is stored only in this browser (localStorage) and sent directly from your browser to Anthropic's API — it never passes through this site's server. Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
+    <div class="steps-status" id="stepsStatus"></div>
+    <div class="steps-grid" id="stepsGrid"></div>
   </div>
 </div>
 
@@ -378,6 +407,128 @@ document.getElementById("copyValues").addEventListener("click", async () => {
   const text = SKILLS.map((s, i) => `${s.label}: ${values[i]}`).join("\n");
   try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
 });
+
+// ---------------- next steps (AI-generated, via Anthropic API) ----------------
+const NEXT_STEPS_MODEL = "claude-opus-5";
+const RUBRIC_URL = "skill-level-rubric.md";
+const API_KEY_STORAGE = "dsSkillsAnthropicKey";
+let rubricTextCache = null;
+
+const apiKeyInput = document.getElementById("apiKey");
+const getNextStepsBtn = document.getElementById("getNextSteps");
+const stepsStatus = document.getElementById("stepsStatus");
+const stepsGrid = document.getElementById("stepsGrid");
+
+apiKeyInput.value = localStorage.getItem(API_KEY_STORAGE) || "";
+apiKeyInput.addEventListener("input", () => {
+  localStorage.setItem(API_KEY_STORAGE, apiKeyInput.value.trim());
+});
+
+async function loadRubricText() {
+  if (rubricTextCache) return rubricTextCache;
+  const res = await fetch(RUBRIC_URL);
+  if (!res.ok) throw new Error("Could not load skill-level-rubric.md (" + res.status + ")");
+  rubricTextCache = await res.text();
+  return rubricTextCache;
+}
+
+function nextStepsSchema() {
+  const properties = {};
+  SKILLS.forEach(s => {
+    properties[s.id] = {
+      type: "object",
+      properties: {
+        next_step: { type: "string", description: "One or two sentences: the single most useful, concrete action to close the gap to the next rung." },
+        resource_or_artifact: { type: "string", description: "A specific resource, practice, or artifact to produce/pursue (a project shape, a habit, a type of write-up) — not a generic course name." }
+      },
+      required: ["next_step", "resource_or_artifact"],
+      additionalProperties: false
+    };
+  });
+  return {
+    type: "object",
+    properties,
+    required: SKILLS.map(s => s.id),
+    additionalProperties: false
+  };
+}
+
+function buildNextStepsPrompt(rubricText) {
+  const scoresList = SKILLS.map((s, i) => `- ${s.label} (id: ${s.id}): ${values[i]} / 4`).join("\n");
+  return (
+    "Here is the full skill-level rubric for the Data Scientist Skills Inventory:\n\n" +
+    rubricText +
+    "\n\n---\n\nHere is a person's current self-assessed scores on the nine axes (scale 0-4, half steps allowed):\n\n" +
+    scoresList +
+    "\n\nFor each axis, using that axis's rung ladder in the rubric above, write the single most useful next step to close the gap to the next rung (or, for an axis already at 4, how to extend impact/frontier standing). Ground it in the rubric's 'evidence that counts' and the artifact rule — the step should point at something concrete they could go build, ship, or practice, not a vague instruction to 'learn more.' Keep next_step to one or two sentences."
+  );
+}
+
+function renderNextSteps(data) {
+  stepsGrid.innerHTML = "";
+  SKILLS.forEach((s, i) => {
+    const entry = data[s.id];
+    if (!entry) return;
+    const card = document.createElement("div");
+    card.className = "step-card";
+    card.innerHTML =
+      `<h4>${s.label} <span class="lvl">(${values[i]} / 4)</span></h4>` +
+      `<p>${entry.next_step}</p>` +
+      `<div class="resource"><b>Try:</b> ${entry.resource_or_artifact}</div>`;
+    stepsGrid.appendChild(card);
+  });
+}
+
+async function getNextSteps() {
+  const apiKey = apiKeyInput.value.trim();
+  if (!apiKey) {
+    stepsStatus.textContent = "Enter your Anthropic API key first.";
+    stepsStatus.classList.add("error");
+    return;
+  }
+  stepsStatus.classList.remove("error");
+  stepsStatus.textContent = "Loading rubric and asking Claude...";
+  stepsGrid.innerHTML = "";
+  getNextStepsBtn.disabled = true;
+  try {
+    const rubricText = await loadRubricText();
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        // Required to let a browser call the Messages API directly (no backend proxy in this static site).
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: NEXT_STEPS_MODEL,
+        max_tokens: 4096,
+        output_config: { format: { type: "json_schema", schema: nextStepsSchema() }, effort: "medium" },
+        messages: [{ role: "user", content: buildNextStepsPrompt(rubricText) }]
+      })
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error((payload.error && payload.error.message) || ("Request failed (" + response.status + ")"));
+    }
+    if (payload.stop_reason === "refusal") {
+      throw new Error("Claude declined to generate a response for this request.");
+    }
+    const textBlock = (payload.content || []).find(b => b.type === "text");
+    if (!textBlock) throw new Error("No response text returned.");
+    const data = JSON.parse(textBlock.text);
+    renderNextSteps(data);
+    stepsStatus.textContent = "";
+  } catch (err) {
+    stepsStatus.textContent = err.message || "Something went wrong.";
+    stepsStatus.classList.add("error");
+  } finally {
+    getNextStepsBtn.disabled = false;
+  }
+}
+
+getNextStepsBtn.addEventListener("click", getNextSteps);
 
 // theme changes re-draw (colors are read from CSS at draw time)
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
