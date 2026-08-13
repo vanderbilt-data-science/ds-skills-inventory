@@ -106,6 +106,86 @@
   .tooltip .t-name { font-weight: 600; }
   .tooltip .t-val { color: var(--text-secondary); }
   .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+
+  /* ---- notices ---- */
+  .notice {
+    font-size: 12.5px; border-radius: 8px; padding: 8px 11px; margin-bottom: 12px;
+    background: var(--badge-bg); color: var(--badge-fg); border: 1px solid var(--border);
+  }
+
+  /* ---- guided assessment ---- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 40; display: none;
+    background: rgba(0,0,0,0.45); padding: 24px; overflow-y: auto;
+  }
+  .overlay[data-open="1"] { display: block; }
+  .quiz {
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 14px;
+    max-width: 720px; margin: 0 auto; padding: 22px 24px 20px;
+  }
+  .quiz-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .quiz-head .step { font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; }
+  .quiz h2 { font-size: 19px; font-weight: 700; margin-top: 2px; }
+  .quiz .probe {
+    font-size: 14.5px; font-style: italic; color: var(--text-secondary);
+    border-left: 3px solid var(--series-1); padding: 4px 0 4px 12px; margin: 12px 0 4px;
+  }
+  .quiz .dial-note { font-size: 12.5px; color: var(--text-muted); margin-bottom: 10px; }
+  .progress { height: 4px; background: var(--grid); border-radius: 2px; margin: 12px 0 4px; overflow: hidden; }
+  .progress > span { display: block; height: 100%; background: var(--series-1); transition: width 0.18s ease; }
+  .opts { display: flex; flex-direction: column; gap: 7px; margin: 12px 0; }
+  .opt {
+    display: grid; grid-template-columns: 22px 26px 1fr; gap: 8px; align-items: start;
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; font-size: 13.5px; line-height: 1.45;
+  }
+  .opt:hover { border-color: var(--text-muted); }
+  .opt[data-checked="1"] { border-color: var(--series-1); background: color-mix(in srgb, var(--series-1) 8%, transparent); }
+  .opt input { margin-top: 3px; accent-color: var(--series-1); }
+  .opt .lvl { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .followup { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 12px; }
+  .followup h4 { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 7px; }
+  .followup .hint { font-size: 12.5px; color: var(--text-muted); margin: 6px 0 8px; }
+  .followup textarea {
+    font: inherit; font-size: 13.5px; width: 100%; min-height: 58px; resize: vertical;
+    background: var(--page); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+  }
+  .followup input[type="month"] {
+    font: inherit; font-size: 13.5px; background: var(--page); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px;
+  }
+  .inline-opts { display: flex; flex-wrap: wrap; gap: 7px; }
+  .inline-opts label {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer;
+  }
+  .inline-opts label[data-checked="1"] { border-color: var(--series-1); background: color-mix(in srgb, var(--series-1) 8%, transparent); }
+  .quiz-nav { display: flex; gap: 9px; align-items: center; margin-top: 18px; }
+  .quiz-nav .spacer { flex: 1; }
+  .quiz-nav .running { font-size: 12.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .quiz-review { font-size: 13.5px; }
+  .quiz-review table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  .quiz-review th, .quiz-review td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .quiz-review th { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+  .quiz-review td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .quiz-review .adj { color: var(--badge-fg); font-size: 12px; }
+
+  /* ---- history ---- */
+  .history-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .history-head h3 { font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
+  .entry-list { display: flex; flex-direction: column; gap: 6px; }
+  .entry {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 11px; font-size: 13px;
+  }
+  .entry .meta { color: var(--text-muted); font-size: 12px; }
+  .entry .acts { display: flex; gap: 6px; }
+  .entry button { padding: 4px 8px; font-size: 12px; }
+  .entry[data-active="1"] { border-color: var(--series-2); }
+  .empty { font-size: 13px; color: var(--text-muted); padding: 6px 0; }
+  #trend { width: 100%; height: auto; display: block; margin-top: 6px; }
 </style>
 </head>
 <body class="viz-root">
@@ -125,6 +205,7 @@
     <label>Compare with
       <select id="compare" aria-label="Comparison overlay"></select>
     </label>
+    <button id="startQuiz">Guided assessment</button>
     <button id="downloadSvg">Download SVG</button>
     <button id="downloadPng">Download PNG</button>
     <button id="copyValues">Copy values</button>
@@ -139,6 +220,33 @@
       <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Values are also listed beside each slider.</div>
     </div>
   </div>
+
+  <div class="panel" id="historyPanel" style="margin-top:20px">
+    <div class="history-head">
+      <h3>Profile history</h3>
+      <label>Module
+        <select id="moduleSel" aria-label="Module this profile belongs to"></select>
+      </label>
+      <button id="saveEntry">Save current profile</button>
+      <span style="flex:1"></span>
+      <button id="exportHistory">Export JSON</button>
+      <button id="importHistory">Import JSON</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+    <div id="storageNotice"></div>
+    <div class="entry-list" id="entryList"></div>
+    <div id="trendWrap" hidden>
+      <div class="history-head" style="margin-top:18px">
+        <h3>Change across modules</h3>
+      </div>
+      <svg id="trend" viewBox="0 0 1120 430" role="img" aria-label="Per-axis skill level across modules"></svg>
+      <div class="footnote">One line per axis, plotted at each saved assessment point. The radar keeps its two-profile cap on purpose &mdash; overlaid polygons mislead, so change over time lives here instead.</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="quizOverlay" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+  <div class="quiz" id="quizCard"></div>
 </div>
 
 <script>
@@ -174,8 +282,182 @@ const PRESETS = {
 const N = SKILLS.length, CX = 545, CY = 360, R = 235, MAXV = 4;
 let values = PRESETS["Balanced 2026 DS"].slice();
 
+// ---------------- program calendar ----------------
+// Rolling the cohort forward a year is a single edit to COHORT + MODULES.
+// `start` is the first day of classes, `end` the last day of finals, so the
+// window a student is likely to sit down in is covered. Entries are ordered by
+// program position, not by whenever the assessment happened to be taken.
+const COHORT = "2026–27";
+const MODULES = [
+  { id: "baseline", label: "Intake baseline", start: "2026-06-01", end: "2026-08-23" },
+  { id: "m1",       label: "Module 1",        start: "2026-08-24", end: "2026-10-15" },
+  { id: "m2",       label: "Module 2",        start: "2026-10-21", end: "2026-12-19" },
+  { id: "m3",       label: "Module 3",        start: "2027-01-11", end: "2027-03-04" },
+  { id: "m4",       label: "Module 4",        start: "2027-03-15", end: "2027-05-06" },
+];
+const moduleById = id => MODULES.find(m => m.id === id) || null;
+const moduleLabel = id => (moduleById(id) || {}).label || id;
+
+// Default the selector to where the program is today. Between modules (and
+// after commencement) fall back to the most recent module that has started;
+// before the year opens, to the baseline. Always user-overridable.
+function inferModuleId(today = todayISO()) {
+  for (const m of MODULES) if (today >= m.start && today <= m.end) return m.id;
+  let last = null;
+  for (const m of MODULES) if (today > m.end) last = m.id;
+  return last || MODULES[0].id;
+}
+// Local calendar date, not UTC — `toISOString()` would roll over to tomorrow
+// for anyone assessing themselves in the evening in a western timezone.
+function todayISO() {
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+function parseYearMonth(s) {
+  const m = /^(\d{4})-(\d{2})/.exec(String(s || ""));
+  return m ? { y: +m[1], m: +m[2] - 1 } : null;
+}
+
+// ---------------- history store ----------------
+// localStorage keeps the file self-contained and offline-capable. It is not
+// available in every from-disk context (Safari blocks it on file://), so every
+// access degrades to an in-memory store rather than throwing and taking the
+// rest of the page down with it.
+const STORE_KEY = "ds-skills-inventory/history/v1";
+const STORE_VERSION = 1;
+let memoryStore = null;       // fallback when localStorage is unavailable
+let storageBlocked = false;
+
+function readHistory() {
+  if (memoryStore) return memoryStore;
+  let raw = null;
+  try { raw = localStorage.getItem(STORE_KEY); }
+  catch (e) { storageBlocked = true; memoryStore = emptyHistory(); return memoryStore; }
+  if (!raw) return emptyHistory();
+  try {
+    const parsed = JSON.parse(raw);
+    return normalizeHistory(parsed);
+  } catch (e) {
+    // Corrupt payload: don't wipe it, just start clean in memory so the user
+    // still has the raw string recoverable from devtools.
+    console.warn("Skills history could not be parsed; starting a fresh session store.", e);
+    memoryStore = emptyHistory();
+    return memoryStore;
+  }
+}
+
+function writeHistory(history) {
+  history.updatedAt = new Date().toISOString();
+  if (memoryStore) { memoryStore = history; return false; }
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(history));
+    return true;
+  } catch (e) {
+    storageBlocked = true;
+    memoryStore = history;
+    return false;
+  }
+}
+
+function emptyHistory() {
+  return { version: STORE_VERSION, cohort: COHORT, entries: [] };
+}
+
+// Accepts anything shaped like our export and returns a valid history object.
+// Unknown/extra fields on entries are preserved so a newer export re-imported
+// into an older copy of the file doesn't silently lose data.
+function normalizeHistory(parsed) {
+  const h = emptyHistory();
+  if (!parsed || typeof parsed !== "object") return h;
+  if (typeof parsed.cohort === "string") h.cohort = parsed.cohort;
+  if (typeof parsed.updatedAt === "string") h.updatedAt = parsed.updatedAt;
+  const list = Array.isArray(parsed.entries) ? parsed.entries : [];
+  h.entries = list.filter(isValidEntry).map(normalizeEntry);
+  return h;
+}
+
+function isValidEntry(e) {
+  return e && typeof e === "object"
+    && Array.isArray(e.values) && e.values.length === N
+    && e.values.every(v => typeof v === "number" && isFinite(v))
+    && typeof e.moduleId === "string";
+}
+
+function normalizeEntry(e) {
+  return Object.assign({}, e, {
+    id: typeof e.id === "string" && e.id ? e.id : newEntryId(),
+    moduleId: moduleById(e.moduleId) ? e.moduleId : MODULES[0].id,
+    savedAt: typeof e.savedAt === "string" ? e.savedAt : new Date().toISOString(),
+    portraitName: typeof e.portraitName === "string" ? e.portraitName : "Data Scientist",
+    values: e.values.map(v => clampScore(v)),
+    answers: (e.answers && typeof e.answers === "object") ? e.answers : {},
+    source: e.source === "guided" ? "guided" : "sliders",
+  });
+}
+
+function newEntryId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "e-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e6).toString(36);
+}
+
+const clampScore = v => Math.max(0, Math.min(MAXV, Math.round(v * 2) / 2));
+
+// Entries in program order, then chronological within a module.
+function sortedEntries(history) {
+  const order = new Map(MODULES.map((m, i) => [m.id, i]));
+  return history.entries.slice().sort((a, b) => {
+    const d = (order.get(a.moduleId) ?? 99) - (order.get(b.moduleId) ?? 99);
+    return d !== 0 ? d : String(a.savedAt).localeCompare(String(b.savedAt));
+  });
+}
+
+// ---------------- rubric adjustments (skill-level-rubric.md §4) ----------------
+// Both are mandatory before a derived score is plotted.
+
+// Verification cap, Programming: axis = min(mean(A,B), B+1), where A is the
+// agentic dial and B the unaided one. You cannot verify what you cannot write.
+function verificationCap(agentic, unaided) {
+  return clampScore(Math.min((agentic + unaided) / 2, unaided + 1));
+}
+
+// Currency decay, AI Agents: -0.5 per six months since the last sustained
+// hands-on period, floored at 1 if the score was ever >= 2.
+// Deliberately NOT frozen into the stored score — it is recomputed from the
+// recorded date every time a profile is displayed, so an entry that was honest
+// when saved stays honest later.
+function currencyDecay(base, lastHandsOn, asOf) {
+  if (!lastHandsOn) return base;
+  // Compared as plain year/month integers rather than Date objects. `new
+  // Date("2026-03-01")` is parsed as UTC midnight but read back with local
+  // getters, which shifts the month backwards anywhere west of Greenwich and
+  // fires the decay a step early.
+  const then = parseYearMonth(lastHandsOn), now = parseYearMonth(asOf);
+  if (!then || !now) return base;
+  const months = (now.y - then.y) * 12 + (now.m - then.m);
+  if (months < 0) return base;
+  const steps = Math.floor(months / 6);
+  if (steps <= 0) return base;
+  const floor = base >= 2 ? 1 : 0;
+  return clampScore(Math.max(floor, base - 0.5 * steps));
+}
+
+// A stored entry holds pre-decay scores; this is what actually gets plotted.
+// Historical entries decay as of the date they were saved, so past points in
+// the trend stay put instead of sliding downward as the year goes on.
+function displayValues(entry, asOf) {
+  const out = entry.values.slice();
+  const ai = SKILLS.findIndex(s => s.id === "agents");
+  const ref = asOf || (entry.savedAt ? entry.savedAt.slice(0, 10) : todayISO());
+  if (ai >= 0 && entry.agentsLastHandsOn) {
+    out[ai] = currencyDecay(out[ai], entry.agentsLastHandsOn, ref);
+  }
+  return out;
+}
+
 // ---------------- helpers ----------------
 const svgNS = "http://www.w3.org/2000/svg";
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const css = v => getComputedStyle(document.body).getPropertyValue(v).trim();
 const angle = i => -Math.PI / 2 + 2 * Math.PI * i / N;
 const pt = (i, r) => [CX + r * Math.cos(angle(i)), CY + r * Math.sin(angle(i))];
@@ -220,6 +502,10 @@ function buildSliders() {
 // ---------------- chart ----------------
 const svg = document.getElementById("chart");
 let compareValues = null;
+// What the overlay is currently showing — a preset name or a saved entry's
+// label. Kept separate from the preset <select> so history entries can drive
+// the same overlay instead of needing a second comparison path.
+let compareLabel = "";
 
 function draw() {
   svg.innerHTML = "";
@@ -281,11 +567,10 @@ function draw() {
 
 function drawLegend() {
   const lg = document.getElementById("legend");
-  const compareName = document.getElementById("compare").value;
   let html = `<span class="key"><span class="swatch" style="background:var(--series-1)"></span>` +
-             `${document.getElementById("portraitName").value || "Data Scientist"}</span>`;
+             `${esc(document.getElementById("portraitName").value || "Data Scientist")}</span>`;
   if (compareValues) {
-    html += `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${compareName}</span>`;
+    html += `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${esc(compareLabel)}</span>`;
   }
   lg.innerHTML = html;
 }
@@ -330,6 +615,9 @@ presetSel.addEventListener("change", () => {
 });
 compareSel.addEventListener("change", () => {
   compareValues = compareSel.value === "None" ? null : PRESETS[compareSel.value].slice();
+  compareLabel = compareSel.value === "None" ? "" : compareSel.value;
+  activeCompareEntryId = null;
+  renderHistory();
   draw();
 });
 document.getElementById("portraitName").addEventListener("input", e => {
@@ -379,11 +667,563 @@ document.getElementById("copyValues").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
 });
 
+// ---------------- guided assessment ----------------
+// Wording is lifted from skill-level-rubric.md §3 — probe questions and rung
+// text are the rubric's own. Options describe behaviour; none of them says
+// "rate yourself 1-4", which is the whole premise of the rubric.
+// Programming carries two questions because §4's verification cap needs two
+// dials; every other axis is one probe plus one artifact confirm.
+const QUESTIONS = [
+  {
+    key: "stats", axisId: "stats", title: "Statistics & Modeling",
+    probe: "One course, two, or beyond into Bayesian? Can you build the model that holds everything else equal — so you can answer whether the campaign worked once seasonality and the acquisition are factored out?",
+    rungs: [
+      "Coursework or none. You can run a test or a regression when told which one to run.",
+      "One to two courses' worth. You have applied inferential statistics or regression to at least one real question. You pick the method with help and report effects more confidently than uncertainty.",
+      "You choose and defend the specification yourself on real questions — controlling confounds, handling seasonality and repeated measures, checking assumptions, reporting uncertainty honestly. Multiple regression and its extensions are comfortable; you have met Bayesian reasoning and can say what a prior is doing.",
+      "You use frequentist and Bayesian methods where each fits, and you design the study, not just the analysis — experiments, quasi-experimental designs, causal identification and its assumptions. You use a Bayesian lens to reason about AI and ML model behavior. Others bring you their designs before collecting data.",
+      "Research-grade. You develop or extend methods, publish or review, and are consulted on statistical questions beyond your organization.",
+    ],
+    miscal: "“I’ve run a lot of models in Python” is a 1. AI writes the code now; the specification is the skill, and level 2 begins at the point where you can defend one. This is a slow axis — it moves by study, not by tooling.",
+    evidence: "An analysis whose specification changed a decision; a design you wrote before data existed; a documented time you said “this data cannot answer that question.”",
+  },
+  {
+    key: "aifound", axisId: "aifound", title: "AI Foundations",
+    probe: "Could you explain a transformer to someone — and name a decision you would make differently because of what you understand?",
+    rungs: [
+      "You use models without a mechanistic account of them. Coursework only.",
+      "You have applied classical ML and off-the-shelf foundation models to real problems, and can explain the machinery at block-diagram level: tokens and embeddings, attention, next-token prediction, pre-training versus fine-tuning versus inference.",
+      "You are solid across the major method families and can name which instrument fits — foundation model, classical ML, statistical model, or no model at all. You run error analysis and basic evals. You can explain why a model hallucinates, what context length actually costs, and what sampling settings change. Your decisions cite mechanism, not vibes.",
+      "Deep grasp of behavior and limits. You design evaluation suites; you know when adaptation (retrieval, fine-tuning, distillation) is worth it and when it isn't; you reason about distribution shift, eval gaming, and silent degradation. Responsible-AI judgment is part of your work — competing fairness definitions, privacy, model risk, regulatory exposure. You can read a paper or model card and turn it into a decision.",
+      "You advance the frontier — novel methods, research-grade work that others build on.",
+    ],
+    miscal: "Being able to explain attention is level 1, not 2. Level 2 is where understanding starts changing decisions. Evaluation lives on this axis deliberately — when AI produces the code and the prose, verification is the core technical act.",
+    evidence: "A build-versus-buy-versus-wait call and the reasoning behind it; an eval suite you designed; a time you recommended against using AI.",
+  },
+  {
+    key: "agents", axisId: "agents", title: "AI Agents & Frameworks",
+    probe: "Are you actually delegating real work — and how do you know the result is right?",
+    note: "This is the axis that never finishes, and the one where the rungs move under you. Score the practices, not the product names.",
+    rungs: [
+      "Chat-style use only. You paste a question in and copy an answer out. You are still the one running everything.",
+      "Productive daily delegation. You work inside an agentic harness on real tasks. You write specifications rather than requests — goal, constraints, acceptance criteria — and you know what to hand off versus do by hand. You keep durable project context so the agent doesn't start cold every session. You review everything that comes back.",
+      "You build capability, not just output. You author reusable Agent Skills that encode your own expertise so the work is done the same correct way every time, and someone else has used one. You connect agents to real systems (MCP and equivalents) and build retrieval and tool-use workflows. Crucially, verification is in the loop — tests, expected record counts, acceptance criteria the agent checks itself against. What you build is version-controlled and shareable.",
+      "You design systems of agents. Multi-step and multi-agent workflows with real orchestration: decomposition, parallel subagents, asynchronous and long-running work you supervise rather than watch. Evals, guardrails, and monitoring are designed in, not bolted on — including cost and latency budgets, permission boundaries, and prompt-injection exposure. You ship packaged capability that other people in the organization install and use.",
+      "You create novel agent architectures, frameworks, or standards — the patterns other people adopt.",
+    ],
+    miscal: "Shipping something that works but that you can't explain how you verified is a 1, not a 2 — the verification is the rung.",
+    evidence: "A Skill someone else installed and used; a specification that produced a working deliverable without you in the loop; an eval that caught a regression before a human did; an agent run you killed, and the reason.",
+    asksCurrency: true,
+  },
+  {
+    key: "prog:A", axisId: "prog", dial: "A", title: "Programming — agentic delivery",
+    probe: "What have you shipped through an agent that you could defend line by line?",
+    note: "Dial A of two. What you can get built and shipped by directing agents.",
+    rungs: [
+      "None.",
+      "Scripts, notebooks, and small analyses via an agent; you can follow what came back and modify it.",
+      "Multi-file projects with tests and a real git workflow; you can direct a refactor, decompose a build into tasks, and tell when the agent has gone sideways.",
+      "Production-grade systems: architecture decisions you make and defend, CI, review standards specifically for AI-generated code, several agents in flight at once.",
+      "Systems, tooling, or standards that other builders adopt.",
+    ],
+    skipEvidence: true,
+  },
+  {
+    key: "prog:B", axisId: "prog", dial: "B", title: "Programming — unaided fluency",
+    probe: "How many languages — and were you the person people brought their bugs to?",
+    note: "Dial B of two. What you can read, write, and debug with the agent turned off. The axis score is min(mean(A,B), B+1) — you cannot verify what you cannot read.",
+    rungs: [
+      "None.",
+      "One language; you can read a script and change it.",
+      "Two or more languages, or real depth in one. You can read unfamiliar code and locate the bug. You were the person others brought their bugs to.",
+      "You design and write non-trivial software by hand — data structures, performance, debugging under pressure.",
+      "Expert engineer; the separate-engineering-team tier.",
+    ],
+    miscal: "The two most common errors are opposite: scoring high on A because things run without ever having verified them, or scoring low because “I don’t really write code anymore.” What this axis does not credit is losing the ability to check.",
+    evidence: "A bug you found in AI-written code that the tests did not catch; a pull request you rejected and why; the last thing you wrote by hand, and why it was worth doing by hand.",
+  },
+  {
+    key: "dataeng", axisId: "dataeng", title: "Data Engineering",
+    probe: "Have you ever gotten data all the way to a dashboard yourself?",
+    rungs: [
+      "No hands-on data access experience. Someone hands you a file.",
+      "You can get the data you need — SQL basics (AI-assisted is fine), APIs, file wrangling, warehouse queries. One-off extracts that you check.",
+      "Working knowledge of warehouses and lakes. You get grain and joins right, run data-quality checks before trusting anything, and document what you learn about a source. You can take data end to end — source to dashboard or to model input — by yourself. You understand both forks: structured pipelines for ML, and corpora, indexes, and retrieval for AI.",
+      "You build pipelines and orchestration that survive without you — scheduling, idempotency, monitoring, lineage, quality at scale. You handle messy and unstructured sources for AI use, and you handle access, governance, and cost.",
+      "You design platforms — streaming, very large scale, specialized infrastructure.",
+    ],
+    miscal: "One good AI-written SQL query is a 1. This axis is about grain, quality, and durability — not query syntax, which is exactly the part that got compressed.",
+    evidence: "A pipeline still running that you have not babysat in a month; a data-quality failure you caught before a stakeholder saw it; metadata you wrote that someone else relied on.",
+  },
+  {
+    key: "viz", axisId: "viz", title: "Visualization",
+    probe: "Have you built something genuinely compelling for a real problem?",
+    rungs: [
+      "Default charts, chart type chosen by habit or by whatever the library did.",
+      "You make correct, readable charts for real work — right form for the data type, labels, units, and scales that don't mislead.",
+      "You design for perception and cognitive load: the signal is encoded in a channel that pops rather than one that has to be searched; categorical counts stay inside working memory; continuous quantities get continuous encodings. You annotate so the chart makes its own point, and you design for color-vision deficiency and contrast — color never carries meaning alone.",
+      "You build visual systems — dashboards and interactive tools that hold up in real use, consistent encodings across a family of views, tuned to audience and medium (a room with a projector is not a laptop). You can justify every design decision, including the ones you rejected.",
+      "Original visual forms or tooling that others adopt; recognized design work.",
+    ],
+    miscal: "“I know Plotly / ggplot / D3” is tool fluency, not this axis. AI will produce the chart; whether it communicates is still you. Slow axis.",
+    evidence: "A chart that changed a decision; a redesign and the reason for it; a visualization someone else reused.",
+  },
+  {
+    key: "comm", axisId: "comm", title: "Communication",
+    probe: "Could you stand up in front of executives and defend it?",
+    rungs: [
+      "You report results informally, to peers, in the order you did the work.",
+      "You present clearly to a friendly technical audience and write a summary people can read.",
+      "You present to non-technical stakeholders and executives: you lead with the decision, state uncertainty honestly, and take hard questions without over-claiming. Your written work gets acted on.",
+      "You build the case and the coalition — negotiating scope, bringing IT, security, and legal in as collaborators rather than obstacles, and getting solutions actually adopted. You are the person sent into the difficult room.",
+      "You shape the conversation beyond your organization — invited talks, published work, external authority.",
+    ],
+    miscal: "Confidence is not this axis; being understood and believed is.",
+    evidence: "A decision that changed because of how you presented it; an uncomfortable result you delivered intact; a stakeholder who started hostile and ended up sponsoring the work.",
+  },
+  {
+    key: "story", axisId: "story", title: "Storytelling",
+    probe: "Could you explain something complex to a non-technical audience as a story?",
+    rungs: [
+      "You recite findings in the order you produced them.",
+      "You structure a narrative — setup, tension, resolution — for a report or a talk.",
+      "You make genuinely complex material intuitive for a lay audience through concrete story, analogy, and example, without falsifying it. You can retarget the same story for different audiences.",
+      "You build the narrative that carries an initiative — the framing other people repeat back to you unprompted. You teach it. You use story to move an organization, not just to explain a result.",
+      "Recognized communicator; your framing becomes the shorthand others use.",
+    ],
+    miscal: "Slides are not a story. This is the axis most often scored from intent rather than effect. Slowest axis on the wheel.",
+    evidence: "An analogy of yours that someone else repeated back; an audience that could retell your point the next day; a talk you were invited back for.",
+  },
+  {
+    key: "domain", axisId: "domain", title: "Domain Knowledge",
+    probe: "Is there a field you actually know?",
+    rungs: [
+      "None. You would need someone to tell you what the columns mean.",
+      "You know one domain's vocabulary and main processes well enough to follow a subject-matter expert and ask reasonable questions.",
+      "You know a domain well enough to ask the right question, to spot a number that cannot be true, and to challenge a stakeholder's framing. You know how the work is actually done, where the data comes from and how it gets dirty, and the compliance basics.",
+      "The domain's own experts treat you as a peer. You understand incentives, politics, and what the numbers do to the people they describe — plus regulatory depth where it applies.",
+      "You are an expert in the domain in your own right, independently of the data science.",
+    ],
+    miscal: "The most over-claimed axis on the wheel. One project in healthcare is not healthcare domain knowledge; it is a 1. Score your strongest domain and list the others in the portrait — averaging destroys the information.",
+    evidence: "A number you rejected on domain grounds and were right about; a question you asked that the SMEs hadn't thought to ask.",
+  },
+];
+
+const CONSISTENCY_OPTS = [
+  { v: "yes", label: "Consistently, and independently" },
+  { v: "no",  label: "Once, or with help / someone set it up" },
+];
+
+let quiz = null;          // { i, answers, currency } while the walkthrough is open
+const quizOverlay = document.getElementById("quizOverlay");
+const quizCard = document.getElementById("quizCard");
+
+function blankQuiz() {
+  const answers = {};
+  QUESTIONS.forEach(q => { answers[q.key] = { level: null, consistent: null, evidence: "" }; });
+  return { i: 0, answers, currency: "" };
+}
+
+// The half step, and the artifact rule (skill-level-rubric.md §1).
+// Both are worth -0.5. They are capped at one half step in total rather than
+// stacked: a blank evidence box is a weaker signal than the rubric's
+// "couldn't name it in twenty seconds", so compounding it into a full level
+// would punish someone for skipping an optional field.
+function halfStepDrop(ans, skipEvidence) {
+  if (!ans || ans.level === null || ans.level < 1) return 0;
+  const notConsistent = ans.consistent === "no";
+  const noArtifact = !skipEvidence && !String(ans.evidence || "").trim();
+  return (notConsistent || noArtifact) ? 0.5 : 0;
+}
+function dialScore(q, answers) {
+  const a = answers[q.key];
+  if (!a || a.level === null) return null;
+  return clampScore(a.level - halfStepDrop(a, q.skipEvidence));
+}
+
+// Turns a completed walkthrough into the nine plotted values, applying the
+// verification cap. Currency decay is deliberately NOT applied here — it is
+// recomputed at display time from the recorded date.
+function deriveFromQuiz(state) {
+  const out = new Array(N).fill(0);
+  const notes = {};
+  SKILLS.forEach((s, i) => {
+    if (s.id === "prog") {
+      const a = dialScore(QUESTIONS.find(q => q.key === "prog:A"), state.answers);
+      const b = dialScore(QUESTIONS.find(q => q.key === "prog:B"), state.answers);
+      if (a === null || b === null) { out[i] = 0; return; }
+      const capped = verificationCap(a, b);
+      out[i] = capped;
+      if (capped < (a + b) / 2) notes.prog = `verification cap: min(mean(${a}, ${b}), ${b}+1)`;
+      else notes.prog = `mean of A=${a} and B=${b}`;
+      return;
+    }
+    const q = QUESTIONS.find(qq => qq.key === s.id);
+    const sc = dialScore(q, state.answers);
+    out[i] = sc === null ? 0 : sc;
+    const drop = halfStepDrop(state.answers[s.id], q && q.skipEvidence);
+    if (drop) notes[s.id] = "half step: not yet consistent, or no artifact named";
+  });
+  return { values: out, notes };
+}
+
+function openQuiz() {
+  quiz = blankQuiz();
+  quizOverlay.dataset.open = "1";
+  renderQuiz();
+  document.addEventListener("keydown", quizKeys);
+}
+function closeQuiz() {
+  quizOverlay.dataset.open = "";
+  quiz = null;
+  document.removeEventListener("keydown", quizKeys);
+}
+function quizKeys(e) { if (e.key === "Escape") closeQuiz(); }
+
+function renderQuiz() {
+  if (!quiz) return;
+  if (quiz.i >= QUESTIONS.length) return renderQuizReview();
+  const q = QUESTIONS[quiz.i];
+  const a = quiz.answers[q.key];
+  const pct = Math.round(quiz.i / QUESTIONS.length * 100);
+
+  let html =
+    `<div class="quiz-head"><span class="step">Question ${quiz.i + 1} of ${QUESTIONS.length}</span>` +
+    `<button id="quizClose" type="button">Close</button></div>` +
+    `<h2 id="quizTitle">${esc(q.title)}</h2>` +
+    `<div class="progress"><span style="width:${pct}%"></span></div>` +
+    `<p class="probe">${esc(q.probe)}</p>` +
+    (q.note ? `<p class="dial-note">${esc(q.note)}</p>` : "") +
+    `<div class="opts">`;
+  q.rungs.forEach((text, lvl) => {
+    html += `<label class="opt" data-checked="${a.level === lvl ? 1 : 0}">` +
+            `<input type="radio" name="rung" value="${lvl}"${a.level === lvl ? " checked" : ""}>` +
+            `<span class="lvl">${lvl}</span><span>${esc(text)}</span></label>`;
+  });
+  html += `</div>`;
+
+  if (a.level !== null && a.level >= 1) {
+    html += `<div class="followup"><h4>Have you done this consistently?</h4><div class="inline-opts">`;
+    CONSISTENCY_OPTS.forEach(o => {
+      html += `<label data-checked="${a.consistent === o.v ? 1 : 0}">` +
+              `<input type="radio" name="consistent" value="${o.v}"${a.consistent === o.v ? " checked" : ""}>` +
+              `${esc(o.label)}</label>`;
+    });
+    html += `</div><p class="hint">&ldquo;Once, or with help&rdquo; is the honest half step &mdash; it takes half a level off.</p></div>`;
+
+    if (!q.skipEvidence) {
+      html += `<div class="followup"><h4>The artifact rule</h4>` +
+              `<p class="hint">Name the thing that exists and the person who used it. ` +
+              `${esc(q.evidence || "")}<br>Leaving this blank takes half a level off, the same as the rubric&rsquo;s twenty-second test.</p>` +
+              `<textarea id="evidence" placeholder="What exists, and who used it?">${esc(a.evidence || "")}</textarea></div>`;
+    }
+  }
+
+  if (q.asksCurrency) {
+    html += `<div class="followup"><h4>When did you last do this for real?</h4>` +
+            `<p class="hint">Last sustained hands-on period with current tooling. Drives the currency decay ` +
+            `(&minus;0.5 per six months, floored at 1 if you were ever at 2 or above), recomputed each time the profile is shown.</p>` +
+            `<input type="month" id="currency" value="${esc(quiz.currency || "")}"></div>`;
+  }
+  if (q.miscal) html += `<p class="dial-note" style="margin-top:14px"><strong>Common miscalibration:</strong> ${esc(q.miscal)}</p>`;
+
+  html += `<div class="quiz-nav">` +
+          `<button id="quizBack" type="button"${quiz.i === 0 ? " disabled" : ""}>Back</button>` +
+          `<button id="quizNext" type="button"${a.level === null ? " disabled" : ""}>` +
+          `${quiz.i === QUESTIONS.length - 1 ? "Review" : "Next"}</button>` +
+          `<span class="spacer"></span>` +
+          `<span class="running">Answered ${QUESTIONS.filter(qq => quiz.answers[qq.key].level !== null).length}/${QUESTIONS.length}</span>` +
+          `</div>`;
+  quizCard.innerHTML = html;
+  quizCard.scrollIntoView({ block: "start" });
+}
+
+function renderQuizReview() {
+  const { values: derived, notes } = deriveFromQuiz(quiz);
+  const asOf = todayISO();
+  let html =
+    `<div class="quiz-head"><span class="step">Review</span>` +
+    `<button id="quizClose" type="button">Close</button></div>` +
+    `<h2 id="quizTitle">Your derived profile</h2>` +
+    `<div class="progress"><span style="width:100%"></span></div>` +
+    `<p class="dial-note">Derived from your answers, with the verification cap applied. ` +
+    `Currency decay on AI Agents is recomputed from the date you gave, every time the profile is drawn.</p>` +
+    `<div class="quiz-review"><table><thead><tr><th>Axis</th><th class="num">Score</th><th>Adjustment</th></tr></thead><tbody>`;
+  SKILLS.forEach((s, i) => {
+    let shown = derived[i], adj = notes[s.id] || "";
+    if (s.id === "agents" && quiz.currency) {
+      const decayed = currencyDecay(derived[i], quiz.currency, asOf);
+      if (decayed !== derived[i]) {
+        adj = (adj ? adj + "; " : "") + `currency decay ${derived[i]} → ${decayed}`;
+        shown = decayed;
+      }
+    }
+    html += `<tr><td>${esc(s.label)}</td><td class="num">${shown}</td><td class="adj">${esc(adj)}</td></tr>`;
+  });
+  html += `</tbody></table></div>` +
+          `<div class="quiz-nav">` +
+          `<button id="quizBack" type="button">Back</button>` +
+          `<button id="quizApply" type="button">Use these values</button>` +
+          `<span class="spacer"></span>` +
+          `<span class="running">Sliders stay editable afterwards</span></div>`;
+  quizCard.innerHTML = html;
+  quizCard.scrollIntoView({ block: "start" });
+}
+
+// One delegated handler for the whole card — it is re-rendered on every change.
+quizCard.addEventListener("change", e => {
+  if (!quiz) return;
+  const q = QUESTIONS[quiz.i];
+  if (e.target.name === "rung") { quiz.answers[q.key].level = +e.target.value; renderQuiz(); }
+  else if (e.target.name === "consistent") { quiz.answers[q.key].consistent = e.target.value; renderQuiz(); }
+  else if (e.target.id === "currency") { quiz.currency = e.target.value; }
+});
+quizCard.addEventListener("input", e => {
+  if (!quiz) return;
+  // Don't re-render on keystrokes — it would steal focus mid-sentence.
+  if (e.target.id === "evidence") quiz.answers[QUESTIONS[quiz.i].key].evidence = e.target.value;
+});
+quizCard.addEventListener("click", e => {
+  if (!quiz) return;
+  const id = e.target.id;
+  if (id === "quizClose") return closeQuiz();
+  if (id === "quizBack") { quiz.i = Math.max(0, quiz.i - 1); return renderQuiz(); }
+  if (id === "quizNext") { quiz.i = Math.min(QUESTIONS.length, quiz.i + 1); return renderQuiz(); }
+  if (id === "quizApply") return applyQuiz();
+});
+quizOverlay.addEventListener("mousedown", e => { if (e.target === quizOverlay) closeQuiz(); });
+
+// Writes into the existing `values` array so compare / export / copy-values
+// all keep working unchanged.
+function applyQuiz() {
+  const { values: derived } = deriveFromQuiz(quiz);
+  values = derived.slice();
+  pendingAnswers = { answers: JSON.parse(JSON.stringify(quiz.answers)), currency: quiz.currency, source: "guided" };
+  syncSliders();
+  presetSel.value = "Custom";
+  closeQuiz();
+  draw();
+}
+
+function syncSliders() {
+  document.querySelectorAll('#sliders input[type="range"]').forEach(sl => {
+    const i = +sl.dataset.idx;
+    sl.value = values[i];
+    document.getElementById("val-" + i).textContent = values[i];
+  });
+}
+
+// Raw answers travel with the next save so a score can be audited later.
+// Dragging a slider invalidates them — the number no longer matches the answers.
+let pendingAnswers = null;
+document.getElementById("startQuiz").addEventListener("click", openQuiz);
+
+// ---------------- history ----------------
+const moduleSel = document.getElementById("moduleSel");
+const entryList = document.getElementById("entryList");
+let activeCompareEntryId = null;
+
+MODULES.forEach(m => moduleSel.add(new Option(m.label, m.id)));
+moduleSel.value = inferModuleId();
+
+function renderHistory() {
+  const history = readHistory();
+  const entries = sortedEntries(history);
+  const notice = document.getElementById("storageNotice");
+  notice.innerHTML = storageBlocked
+    ? `<div class="notice">This browser is blocking local storage for files opened from disk, so saved profiles will not survive a reload. Export to JSON to keep them.</div>`
+    : "";
+
+  if (!entries.length) {
+    entryList.innerHTML = `<p class="empty">No saved profiles yet. Set a module above and save the current profile, or run the guided assessment first.</p>`;
+  } else {
+    entryList.innerHTML = entries.map(e => {
+      const when = String(e.savedAt).slice(0, 10);
+      const decayed = displayValues(e);
+      const mean = (decayed.reduce((a, b) => a + b, 0) / N).toFixed(2);
+      return `<div class="entry" data-active="${activeCompareEntryId === e.id ? 1 : 0}">` +
+        `<div><strong>${esc(moduleLabel(e.moduleId))}</strong> &middot; ${esc(e.portraitName)}` +
+        `<div class="meta">${esc(when)} &middot; mean ${mean} &middot; ${e.source === "guided" ? "guided assessment" : "sliders"}</div></div>` +
+        `<div class="acts">` +
+        `<button data-act="load" data-id="${e.id}">Load</button>` +
+        `<button data-act="compare" data-id="${e.id}">${activeCompareEntryId === e.id ? "Clear overlay" : "Compare"}</button>` +
+        `<button data-act="delete" data-id="${e.id}">Delete</button>` +
+        `</div></div>`;
+    }).join("");
+  }
+  drawTrend(entries);
+}
+
+entryList.addEventListener("click", e => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const history = readHistory();
+  const entry = history.entries.find(x => x.id === btn.dataset.id);
+  if (!entry) return;
+  const act = btn.dataset.act;
+  if (act === "load") {
+    values = displayValues(entry);
+    pendingAnswers = null;
+    syncSliders();
+    presetSel.value = "Custom";
+    document.getElementById("portraitName").value = entry.portraitName;
+    moduleSel.value = entry.moduleId;
+    draw();
+  } else if (act === "compare") {
+    if (activeCompareEntryId === entry.id) {
+      activeCompareEntryId = null; compareValues = null; compareLabel = "";
+    } else {
+      activeCompareEntryId = entry.id;
+      compareValues = displayValues(entry);
+      compareLabel = moduleLabel(entry.moduleId) + " · " + String(entry.savedAt).slice(0, 10);
+      compareSel.value = "None";
+    }
+    renderHistory();
+    draw();
+  } else if (act === "delete") {
+    if (!confirm(`Delete the ${moduleLabel(entry.moduleId)} profile saved ${String(entry.savedAt).slice(0, 10)}? This cannot be undone.`)) return;
+    history.entries = history.entries.filter(x => x.id !== entry.id);
+    if (activeCompareEntryId === entry.id) { activeCompareEntryId = null; compareValues = null; compareLabel = ""; }
+    writeHistory(history);
+    renderHistory();
+    draw();
+  }
+});
+
+document.getElementById("saveEntry").addEventListener("click", () => {
+  const history = readHistory();
+  const moduleId = moduleSel.value;
+  const existing = history.entries.filter(e => e.moduleId === moduleId);
+  if (existing.length) {
+    // Never silently overwrite: replace on OK, keep both on Cancel.
+    const replace = confirm(
+      `You already have ${existing.length} saved profile${existing.length > 1 ? "s" : ""} for ${moduleLabel(moduleId)}.\n\n` +
+      `OK — replace ${existing.length > 1 ? "them" : "it"}.\nCancel — keep ${existing.length > 1 ? "them" : "it"} and save this as another version.`);
+    if (replace) history.entries = history.entries.filter(e => e.moduleId !== moduleId);
+  }
+  const entry = {
+    id: newEntryId(),
+    moduleId,
+    savedAt: new Date().toISOString(),
+    portraitName: document.getElementById("portraitName").value || "Data Scientist",
+    values: values.slice(),
+    answers: pendingAnswers ? pendingAnswers.answers : {},
+    source: pendingAnswers ? "guided" : "sliders",
+  };
+  if (pendingAnswers && pendingAnswers.currency) entry.agentsLastHandsOn = pendingAnswers.currency;
+  history.entries.push(entry);
+  writeHistory(history);
+  renderHistory();
+});
+
+// ---------------- history export / import ----------------
+document.getElementById("exportHistory").addEventListener("click", () => {
+  const history = readHistory();
+  const blob = new Blob([JSON.stringify(history, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "skills-history-" + todayISO() + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+document.getElementById("importHistory").addEventListener("click", () => document.getElementById("importFile").click());
+document.getElementById("importFile").addEventListener("change", e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let incoming;
+    try { incoming = normalizeHistory(JSON.parse(reader.result)); }
+    catch (err) { alert("That file could not be read as a skills history export."); return; }
+    if (!incoming.entries.length) { alert("No usable profiles found in that file."); return; }
+    const current = readHistory();
+    let merged;
+    if (current.entries.length) {
+      const replace = confirm(
+        `Importing ${incoming.entries.length} profile${incoming.entries.length > 1 ? "s" : ""}.\n\n` +
+        `OK — replace your ${current.entries.length} saved profile${current.entries.length > 1 ? "s" : ""}.\n` +
+        `Cancel — merge them in, keeping both.`);
+      merged = replace ? incoming : mergeHistories(current, incoming);
+    } else {
+      merged = incoming;
+    }
+    writeHistory(merged);
+    renderHistory();
+  };
+  reader.readAsText(file);
+  e.target.value = "";   // let the same file be picked again
+});
+
+// Merge on id, so re-importing your own export is a no-op rather than a
+// duplicate — that is what makes the round-trip lossless.
+function mergeHistories(current, incoming) {
+  const byId = new Map(current.entries.map(e => [e.id, e]));
+  incoming.entries.forEach(e => byId.set(e.id, e));
+  const out = emptyHistory();
+  out.cohort = current.cohort || incoming.cohort;
+  out.entries = Array.from(byId.values());
+  return out;
+}
+
+// ---------------- trend (small multiples) ----------------
+// Nine mini panels rather than five stacked radars: vis-design-rationale.md
+// caps the radar at two profiles because areas mislead and many shapes get
+// muddy. Per-axis lines are the form that shows fast-rising versus last-mile
+// axes, which is the point of keeping a history at all.
+const trendSvg = document.getElementById("trend");
+function drawTrend(entries) {
+  const wrap = document.getElementById("trendWrap");
+  if (entries.length < 2) { wrap.hidden = true; trendSvg.innerHTML = ""; return; }
+  wrap.hidden = false;
+  trendSvg.innerHTML = "";
+
+  const COLS = 3, CW = 1120 / COLS, CH = 200, PADL = 46, PADR = 22, PADT = 30, PLOTH = 112;
+  trendSvg.setAttribute("viewBox", `0 0 1120 ${CH * Math.ceil(N / COLS) + 16}`);
+  const font = "system-ui, sans-serif";
+  const xAt = (col, k) => {
+    const w = CW - PADL - PADR;
+    return col * CW + PADL + (entries.length === 1 ? w / 2 : w * k / (entries.length - 1));
+  };
+  const yAt = (row, v) => row * CH + PADT + PLOTH * (1 - v / MAXV);
+
+  SKILLS.forEach((s, si) => {
+    const col = si % COLS, row = Math.floor(si / COLS);
+    const stroke = css(CLUSTERS[s.cluster].varName);
+
+    el("text", { x: col * CW + PADL - 6, y: row * CH + 18, "font-size": 15, "font-weight": 600,
+                 fill: css("--text-primary"), "font-family": font }, trendSvg).textContent = s.label;
+
+    [0, 2, 4].forEach(v => {
+      el("line", { x1: col * CW + PADL, y1: yAt(row, v), x2: col * CW + CW - PADR, y2: yAt(row, v),
+                   stroke: css("--grid"), "stroke-width": 1 }, trendSvg);
+      el("text", { x: col * CW + PADL - 8, y: yAt(row, v) + 4, "text-anchor": "end", "font-size": 11,
+                   fill: css("--text-muted"), "font-family": font }, trendSvg).textContent = v;
+    });
+
+    const pts = entries.map((e, k) => [xAt(col, k), yAt(row, displayValues(e)[si])]);
+    el("polyline", { points: pts.map(p => p.join(",")).join(" "), fill: "none",
+                     stroke, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }, trendSvg);
+    pts.forEach(p => el("circle", { cx: p[0], cy: p[1], r: 3.5, fill: stroke }, trendSvg));
+
+    entries.forEach((e, k) => {
+      const short = e.moduleId === "baseline" ? "Base" : moduleLabel(e.moduleId).replace("Module ", "M");
+      el("text", { x: xAt(col, k), y: row * CH + PADT + PLOTH + 18, "text-anchor": "middle", "font-size": 11,
+                   fill: css("--text-muted"), "font-family": font }, trendSvg).textContent = short;
+    });
+  });
+}
+
 // theme changes re-draw (colors are read from CSS at draw time)
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  draw();
+  renderHistory();
+});
 
 buildSliders();
+// A slider drag means the plotted numbers no longer match the stored answers.
+slidersHost.addEventListener("input", e => { if (e.target.type === "range") pendingAnswers = null; });
 draw();
+renderHistory();
 </script>
 </body>
 </html>
