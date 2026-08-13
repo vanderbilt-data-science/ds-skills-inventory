@@ -106,6 +106,32 @@
   .tooltip .t-name { font-weight: 600; }
   .tooltip .t-val { color: var(--text-secondary); }
   .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .history-panel { margin-top: 20px; }
+  .history-header {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+  }
+  .history-header h3 { font-size: 15px; font-weight: 700; }
+  .hint { font-weight: 400; color: var(--text-muted); font-size: 12px; }
+  .history-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input[type="date"] {
+    font: inherit; font-size: 13.5px;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px;
+  }
+  .history-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow: auto; }
+  .history-row {
+    display: grid; grid-template-columns: 100px 1fr auto; gap: 10px; align-items: center;
+    padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px;
+  }
+  .history-row button { padding: 4px 8px; font-size: 12px; }
+  .playback {
+    display: flex; gap: 10px; align-items: center; margin-top: 14px;
+    padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .playback[hidden] { display: none; }
+  .growth-label { font-size: 12.5px; color: var(--text-secondary); min-width: 190px; }
+  #growthScrubber { flex: 1; min-width: 160px; accent-color: var(--series-2); }
 </style>
 </head>
 <body class="viz-root">
@@ -137,6 +163,26 @@
       <div class="legend" id="legend"></div>
       <div class="tooltip" id="tooltip"></div>
       <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Values are also listed beside each slider.</div>
+    </div>
+  </div>
+
+  <div class="panel history-panel">
+    <div class="history-header">
+      <h3>My attempts <span class="hint">saved in this browser &mdash; retake the assessment over the semester and compare</span></h3>
+      <div class="history-controls">
+        <label>Date <input type="date" id="attemptDate" aria-label="Attempt date"></label>
+        <button id="saveAttempt">Save current as attempt</button>
+        <button id="exportHistory">Export history (.json)</button>
+        <button id="importHistoryBtn">Import history (.json)</button>
+        <input type="file" id="importHistoryFile" accept="application/json" hidden>
+      </div>
+    </div>
+    <div class="history-list" id="historyList"></div>
+    <div class="playback" id="playbackControls" hidden>
+      <button id="playGrowth">&#9654; Play growth</button>
+      <input type="range" id="growthScrubber" min="0" max="1" step="0.001" value="0" aria-label="Scrub growth over time">
+      <span class="growth-label" id="growthLabel"></span>
+      <button id="exportAnimSvg">Download animated SVG</button>
     </div>
   </div>
 </div>
@@ -174,6 +220,19 @@ const PRESETS = {
 const N = SKILLS.length, CX = 545, CY = 360, R = 235, MAXV = 4;
 let values = PRESETS["Balanced 2026 DS"].slice();
 
+// ---------------- attempt history (localStorage, no backend) ----------------
+const HISTORY_KEY = "dsSkillsHistory_v1";
+function loadHistory() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY));
+    return Array.isArray(raw) ? raw : [];
+  } catch (e) { return []; }
+}
+function persistHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+function historySorted() { return history.slice().sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)); }
+let history = loadHistory();
+let compareLabel = null;
+
 // ---------------- helpers ----------------
 const svgNS = "http://www.w3.org/2000/svg";
 const css = v => getComputedStyle(document.body).getPropertyValue(v).trim();
@@ -209,6 +268,7 @@ function buildSliders() {
   });
   slidersHost.addEventListener("input", e => {
     if (e.target.type !== "range") return;
+    pausePlayback();
     const i = +e.target.dataset.idx;
     values[i] = +e.target.value;
     document.getElementById("val-" + i).textContent = values[i];
@@ -281,11 +341,10 @@ function draw() {
 
 function drawLegend() {
   const lg = document.getElementById("legend");
-  const compareName = document.getElementById("compare").value;
   let html = `<span class="key"><span class="swatch" style="background:var(--series-1)"></span>` +
              `${document.getElementById("portraitName").value || "Data Scientist"}</span>`;
   if (compareValues) {
-    html += `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${compareName}</span>`;
+    html += `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${compareLabel || "Comparison"}</span>`;
   }
   lg.innerHTML = html;
 }
@@ -308,13 +367,11 @@ const presetSel = document.getElementById("preset");
 const compareSel = document.getElementById("compare");
 Object.keys(PRESETS).forEach(name => {
   presetSel.add(new Option(name, name));
-  if (name !== "Custom") compareSel.add(new Option(name, name));
 });
-compareSel.add(new Option("None", "None"), 0);
-compareSel.value = "None";
 presetSel.value = "Balanced 2026 DS";
 
 presetSel.addEventListener("change", () => {
+  pausePlayback();
   const p = PRESETS[presetSel.value];
   if (!p) return;
   values = p.slice();
@@ -328,14 +385,190 @@ presetSel.addEventListener("change", () => {
   }
   draw();
 });
+
+function rebuildCompareOptions() {
+  const prev = compareSel.value;
+  compareSel.innerHTML = "";
+  compareSel.add(new Option("None", "None"));
+  const ogPresets = document.createElement("optgroup");
+  ogPresets.label = "Archetypes";
+  Object.keys(PRESETS).forEach(name => { if (name !== "Custom") ogPresets.appendChild(new Option(name, name)); });
+  compareSel.appendChild(ogPresets);
+  const h = historySorted();
+  if (h.length) {
+    const ogHistory = document.createElement("optgroup");
+    ogHistory.label = "My attempts";
+    h.forEach(a => ogHistory.appendChild(new Option(`${a.date} — ${a.name}`, "history:" + a.id)));
+    compareSel.appendChild(ogHistory);
+  }
+  compareSel.value = Array.from(compareSel.options).some(o => o.value === prev) ? prev : "None";
+}
 compareSel.addEventListener("change", () => {
-  compareValues = compareSel.value === "None" ? null : PRESETS[compareSel.value].slice();
+  const v = compareSel.value;
+  if (v === "None") {
+    compareValues = null; compareLabel = null;
+  } else if (v.startsWith("history:")) {
+    const a = history.find(x => x.id === v.slice(8));
+    compareValues = a ? a.values.slice() : null;
+    compareLabel = a ? `${a.date} — ${a.name}` : null;
+  } else {
+    compareValues = PRESETS[v] ? PRESETS[v].slice() : null;
+    compareLabel = v;
+  }
   draw();
 });
 document.getElementById("portraitName").addEventListener("input", e => {
   e.target.dataset.userEdited = "1";
   draw();
 });
+
+// ---------------- attempt history: UI ----------------
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function renderHistoryList() {
+  const host = document.getElementById("historyList");
+  const h = historySorted();
+  if (!h.length) {
+    host.innerHTML = `<p class="hint" style="margin:4px 0;">No saved attempts yet. Set your sliders, then click &ldquo;Save current as attempt.&rdquo;</p>`;
+  } else {
+    host.innerHTML = h.map(a => `
+      <div class="history-row">
+        <span>${escapeHtml(a.date)}</span>
+        <span>${escapeHtml(a.name)}</span>
+        <span>
+          <button data-act="load" data-id="${a.id}">Load</button>
+          <button data-act="compare" data-id="${a.id}">Compare</button>
+          <button data-act="delete" data-id="${a.id}">Delete</button>
+        </span>
+      </div>`).join("");
+  }
+  document.getElementById("playbackControls").hidden = h.length < 2;
+  rebuildCompareOptions();
+}
+document.getElementById("historyList").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const a = history.find(x => x.id === btn.dataset.id);
+  if (!a) return;
+  pausePlayback();
+  if (btn.dataset.act === "load") {
+    values = a.values.slice();
+    const nameBox = document.getElementById("portraitName");
+    nameBox.value = a.name;
+    nameBox.dataset.userEdited = "1";
+    document.getElementById("attemptDate").value = a.date;
+    presetSel.value = "Custom";
+    document.querySelectorAll('#sliders input[type="range"]').forEach(sl => {
+      sl.value = values[+sl.dataset.idx];
+      document.getElementById("val-" + sl.dataset.idx).textContent = values[+sl.dataset.idx];
+    });
+    draw();
+  } else if (btn.dataset.act === "compare") {
+    compareValues = a.values.slice();
+    compareLabel = `${a.date} — ${a.name}`;
+    compareSel.value = "history:" + a.id;
+    draw();
+  } else if (btn.dataset.act === "delete") {
+    if (!confirm(`Delete attempt "${a.name}" (${a.date})?`)) return;
+    history = history.filter(x => x.id !== a.id);
+    persistHistory();
+    renderHistoryList();
+  }
+});
+document.getElementById("saveAttempt").addEventListener("click", () => {
+  const name = document.getElementById("portraitName").value.trim() || "Data Scientist";
+  const date = document.getElementById("attemptDate").value || new Date().toISOString().slice(0, 10);
+  const id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  history.push({ id, name, date, values: values.slice() });
+  persistHistory();
+  renderHistoryList();
+});
+document.getElementById("exportHistory").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(history, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ds-skills-history.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+document.getElementById("importHistoryBtn").addEventListener("click", () => {
+  document.getElementById("importHistoryFile").click();
+});
+document.getElementById("importHistoryFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const incoming = JSON.parse(await file.text());
+    if (!Array.isArray(incoming)) throw new Error("not an array");
+    const existingIds = new Set(history.map(a => a.id));
+    let added = 0;
+    incoming.forEach(a => {
+      if (a && typeof a.date === "string" && Array.isArray(a.values) && a.values.length === N) {
+        const id = a.id && !existingIds.has(a.id) ? a.id : (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${added}-${Math.random().toString(36).slice(2)}`);
+        history.push({ id, name: a.name || "Data Scientist", date: a.date, values: a.values.slice(0, N) });
+        existingIds.add(id);
+        added++;
+      }
+    });
+    persistHistory();
+    renderHistoryList();
+    alert(`Imported ${added} attempt(s).`);
+  } catch (err) {
+    alert("Could not import that file — expected the JSON exported from this tool.");
+  }
+  e.target.value = "";
+});
+
+// ---------------- growth playback (in-app) ----------------
+const SEG_HOLD = 700, SEG_TRANS = 900; // ms
+let playing = false, playRaf = null, playStartTs = null;
+const scrubber = document.getElementById("growthScrubber");
+const growthLabel = document.getElementById("growthLabel");
+const playBtn = document.getElementById("playGrowth");
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function valuesAtFraction(hArr, frac) {
+  const K = hArr.length, segMs = SEG_HOLD + SEG_TRANS, totalMs = segMs * K;
+  const t = frac * totalMs;
+  const segIdx = Math.min(K - 1, Math.floor(t / segMs));
+  const segT = t - segIdx * segMs;
+  const from = hArr[segIdx], to = hArr[(segIdx + 1) % K];
+  const p = segT < SEG_HOLD ? 0 : easeInOut((segT - SEG_HOLD) / SEG_TRANS);
+  return { interp: from.values.map((v, i) => v + (to.values[i] - v) * p), from, to, p };
+}
+function applyFrame(frac) {
+  const h = historySorted();
+  if (h.length < 2) return;
+  const { interp, from, to, p } = valuesAtFraction(h, frac);
+  values = interp;
+  draw();
+  growthLabel.textContent = p < 0.02 ? `${from.date} — ${from.name}` : `${from.date} → ${to.date}`;
+  scrubber.value = frac;
+}
+function startPlayback() {
+  const h = historySorted();
+  if (h.length < 2) return;
+  playing = true;
+  playBtn.textContent = "⏸ Pause";
+  const totalMs = h.length * (SEG_HOLD + SEG_TRANS);
+  playStartTs = performance.now() - (parseFloat(scrubber.value) || 0) * totalMs;
+  const step = now => {
+    if (!playing) return;
+    const h2 = historySorted();
+    const total = h2.length * (SEG_HOLD + SEG_TRANS);
+    applyFrame(((now - playStartTs) % total) / total);
+    playRaf = requestAnimationFrame(step);
+  };
+  playRaf = requestAnimationFrame(step);
+}
+function pausePlayback() {
+  if (!playing) return;
+  playing = false;
+  playBtn.textContent = "▶ Play growth";
+  if (playRaf) cancelAnimationFrame(playRaf);
+}
+playBtn.addEventListener("click", () => { playing ? pausePlayback() : startPlayback(); });
+scrubber.addEventListener("input", () => { pausePlayback(); applyFrame(parseFloat(scrubber.value)); });
 
 // ---------------- export ----------------
 function standaloneSvg() {
@@ -379,10 +612,115 @@ document.getElementById("copyValues").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
 });
 
+// ---------------- animated growth SVG export ----------------
+function pointsStrFor(vals) { return vals.map((v, i) => pt(i, R * v / MAXV).join(",")).join(" "); }
+function buildAnimTiming(K, dwellFrac) {
+  const times = [];
+  for (let i = 0; i < K; i++) {
+    const segStart = i / K, dwellEnd = segStart + dwellFrac / K;
+    times.push(+segStart.toFixed(6), +dwellEnd.toFixed(6));
+  }
+  times.push(1);
+  return times;
+}
+function buildAnimValues(K, valueAt) {
+  const vals = [];
+  for (let i = 0; i < K; i++) { const v = valueAt(i); vals.push(v, v); }
+  vals.push(valueAt(0));
+  return vals;
+}
+function downloadAnimatedGrowthSvg(h) {
+  const K = h.length, dwellFrac = 0.35, secPerSeg = 1.6;
+  const totalSec = (K * secPerSeg).toFixed(2);
+  const times = buildAnimTiming(K, dwellFrac).join(";");
+  const W = 1120, H = 780, timelineY = 700, tlX0 = 200, tlX1 = 920;
+  const tickX = k => K === 1 ? tlX0 : tlX0 + k * (tlX1 - tlX0) / (K - 1);
+
+  const tmp = document.createElementNS(svgNS, "svg");
+  tmp.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  tmp.setAttribute("xmlns", svgNS);
+  el("rect", { x: 0, y: 0, width: W, height: H, fill: css("--surface-1") }, tmp);
+  el("text", { x: CX, y: 42, "text-anchor": "middle", "font-size": 30, "font-weight": 700,
+               fill: css("--text-primary"), "font-family": "system-ui, sans-serif" }, tmp)
+    .textContent = document.getElementById("portraitName").value || "Data Scientist";
+  el("text", { x: CX, y: 66, "text-anchor": "middle", "font-size": 14,
+               fill: css("--text-secondary"), "font-family": "system-ui, sans-serif" }, tmp)
+    .textContent = `Growth: ${h[0].date} → ${h[K - 1].date} (${K} attempts)`;
+
+  for (let v = 1; v <= MAXV; v++) {
+    el("circle", { cx: CX, cy: CY, r: R * v / MAXV, fill: "none",
+                   stroke: v === MAXV ? css("--axis") : css("--grid"), "stroke-width": 1 }, tmp);
+    el("text", { x: CX + 12, y: CY - R * v / MAXV + 5, "font-size": 13,
+                 fill: css("--text-muted"), "font-family": "system-ui, sans-serif" }, tmp).textContent = v;
+  }
+  for (let i = 0; i < N; i++) {
+    const [x, y] = pt(i, R);
+    el("line", { x1: CX, y1: CY, x2: x, y2: y, stroke: css("--grid"), "stroke-width": 1 }, tmp);
+  }
+
+  const polyValues = buildAnimValues(K, k => pointsStrFor(h[k].values)).join(";");
+  const poly = el("polygon", { points: pointsStrFor(h[0].values), fill: css("--series-1"),
+                  "fill-opacity": 0.22, stroke: css("--series-1"), "stroke-width": 2, "stroke-linejoin": "round" }, tmp);
+  el("animate", { attributeName: "points", dur: totalSec + "s", keyTimes: times, values: polyValues,
+                  calcMode: "linear", repeatCount: "indefinite" }, poly);
+
+  for (let i = 0; i < N; i++) {
+    const [x0, y0] = pt(i, R * h[0].values[i] / MAXV);
+    const dot = el("circle", { cx: x0, cy: y0, r: 4, fill: css("--series-1") }, tmp);
+    const cxVals = buildAnimValues(K, k => pt(i, R * h[k].values[i] / MAXV)[0]).join(";");
+    const cyVals = buildAnimValues(K, k => pt(i, R * h[k].values[i] / MAXV)[1]).join(";");
+    el("animate", { attributeName: "cx", dur: totalSec + "s", keyTimes: times, values: cxVals, calcMode: "linear", repeatCount: "indefinite" }, dot);
+    el("animate", { attributeName: "cy", dur: totalSec + "s", keyTimes: times, values: cyVals, calcMode: "linear", repeatCount: "indefinite" }, dot);
+  }
+
+  SKILLS.forEach((s, i) => {
+    const a = angle(i), c = Math.cos(a), sn = Math.sin(a);
+    const lx = CX + (R + 30) * c, ly = CY + (R + 30) * sn;
+    let anchor = "middle";
+    if (c > 0.35) anchor = "start";
+    if (c < -0.35) anchor = "end";
+    let dy = 7;
+    if (sn < -0.85) dy = 0;
+    if (sn > 0.85) dy = 16;
+    el("text", { x: lx, y: ly + dy, "text-anchor": anchor, "font-size": 20, "font-weight": 600,
+                 fill: css("--text-primary"), "font-family": "system-ui, sans-serif" }, tmp)
+      .textContent = s.label + (s.isNew ? " •" : "");
+  });
+
+  el("line", { x1: tlX0, y1: timelineY, x2: tlX1, y2: timelineY, stroke: css("--axis"), "stroke-width": 1 }, tmp);
+  h.forEach((a, k) => {
+    const x = tickX(k);
+    el("line", { x1: x, y1: timelineY - 5, x2: x, y2: timelineY + 5, stroke: css("--text-muted"), "stroke-width": 1 }, tmp);
+    el("text", { x, y: timelineY + 20, "font-size": 11, "text-anchor": "end",
+                 fill: css("--text-secondary"), "font-family": "system-ui, sans-serif",
+                 transform: `rotate(-35 ${x} ${timelineY + 20})` }, tmp).textContent = a.date;
+  });
+  const dotVals = buildAnimValues(K, k => tickX(k)).join(";");
+  const marker = el("circle", { cx: tickX(0), cy: timelineY, r: 6, fill: css("--series-2") }, tmp);
+  el("animate", { attributeName: "cx", dur: totalSec + "s", keyTimes: times, values: dotVals, calcMode: "linear", repeatCount: "indefinite" }, marker);
+
+  const xml = new XMLSerializer().serializeToString(tmp);
+  const blob = new Blob([xml], { type: "image/svg+xml" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  const n = (document.getElementById("portraitName").value || "skills").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  a.download = (n || "skills") + "-growth.svg";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+document.getElementById("exportAnimSvg").addEventListener("click", () => {
+  pausePlayback();
+  const h = historySorted();
+  if (h.length < 2) { alert("Save at least two attempts to export a growth animation."); return; }
+  downloadAnimatedGrowthSvg(h);
+});
+
 // theme changes re-draw (colors are read from CSS at draw time)
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
 
+document.getElementById("attemptDate").value = new Date().toISOString().slice(0, 10);
 buildSliders();
+renderHistoryList();
 draw();
 </script>
 </body>

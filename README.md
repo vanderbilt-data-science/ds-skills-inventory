@@ -194,11 +194,14 @@ Then keep the file. It's a single self-contained HTML page, so you can save your
 own copy, put your name on it, and re-run the assessment later to see the shape
 change.
 
-**An exercise, if you want one.** The explorer deliberately has no backend.
-Take it and build one: record each self-assessment with a timestamp, then play
-your profile back as a movie over the course of a program. Point an agent at
-this repo and build it the way *you* want it — which is, appropriately, an
-exercise on the axis this revision added.
+**Retaking it over a program.** The explorer still has no server backend, but
+it now tracks a history of attempts in your browser: click **Save current as
+attempt** each time you retake the assessment, then use **Compare with** to
+overlay any past attempt (not just an archetype), or **Play growth** to watch
+your polygon morph across every saved attempt. **Download animated SVG**
+turns that into a standalone file once you have two or more attempts. Because
+history lives in browser storage, use **Export history (.json)** before
+switching machines and **Import history (.json)** to bring it back.
 
 ## What's in the repo
 
@@ -223,7 +226,13 @@ dependencies, so it works offline and off a USB stick.
 - **Presets** load any archetype in one click. Touching a slider flips the
   selector to "Custom", so a preset never silently misdescribes what's shown.
 - **Comparison** overlays a second profile as a dashed, unfilled polygon — your
-  team today against what the next stage would require.
+  team today against what the next stage would require, or your current
+  attempt against a saved one from earlier in the program.
+- **My attempts** saves timestamped attempts to the browser so you can retake
+  the assessment over a semester: load or delete any past attempt, play a
+  growth animation across all of them, or export the animation as a
+  standalone SVG. Export/import the history as JSON to move it between
+  machines.
 - **Export** downloads the current chart as SVG (vector, editable) or PNG
   (paste into slides), and "Copy values" gives you the raw numbers.
 - **Light and dark** are both hand-tuned; the chart follows your OS theme.
