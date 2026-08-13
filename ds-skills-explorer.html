@@ -112,12 +112,15 @@
 <div class="wrap">
   <header>
     <h1>Data Scientist Skills Explorer</h1>
-    <p>2026 skills inventory &mdash; drag the sliders to sketch a data scientist&rsquo;s portrait. Scale 0&ndash;4 per skill.</p>
+    <p>2026 skills inventory &mdash; drag the sliders to sketch a data scientist&rsquo;s portrait. Scale 0&ndash;4 per skill. &middot; <a href="team.html">See the team view &rarr;</a></p>
   </header>
 
   <div class="toolbar">
     <label>Portrait
       <input type="text" id="portraitName" value="Data Scientist" aria-label="Portrait name">
+    </label>
+    <label>GitHub username
+      <input type="text" id="githubUser" placeholder="for team profile" aria-label="GitHub username">
     </label>
     <label>Preset
       <select id="preset" aria-label="Load preset"></select>
@@ -128,6 +131,7 @@
     <button id="downloadSvg">Download SVG</button>
     <button id="downloadPng">Download PNG</button>
     <button id="copyValues">Copy values</button>
+    <button id="saveProfile">Save profile (JSON)</button>
   </div>
 
   <div class="layout">
@@ -377,6 +381,30 @@ document.getElementById("downloadPng").addEventListener("click", () => {
 document.getElementById("copyValues").addEventListener("click", async () => {
   const text = SKILLS.map((s, i) => `${s.label}: ${values[i]}`).join("\n");
   try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
+});
+
+// ---------------- team profile (git-as-database; see profiles/README.md) ----------------
+const githubBox = document.getElementById("githubUser");
+try {
+  const savedName = localStorage.getItem("ds-skills-name");
+  const savedGh = localStorage.getItem("ds-skills-github");
+  if (savedName) { document.getElementById("portraitName").value = savedName; document.getElementById("portraitName").dataset.userEdited = "1"; }
+  if (savedGh) githubBox.value = savedGh;
+} catch (e) { /* localStorage unavailable (e.g. private browsing) */ }
+
+document.getElementById("saveProfile").addEventListener("click", () => {
+  const name = document.getElementById("portraitName").value.trim();
+  const gh = githubBox.value.trim().toLowerCase().replace(/^@/, "");
+  if (!gh) { githubBox.focus(); alert("Enter your GitHub username first — the team view uses it as your filename."); return; }
+  try { localStorage.setItem("ds-skills-name", name); localStorage.setItem("ds-skills-github", gh); } catch (e) { /* ignore */ }
+  const profile = { name: name || gh, github: gh, updated: new Date().toISOString().slice(0, 10), values: values.slice() };
+  const blob = new Blob([JSON.stringify(profile, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = gh + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  alert(`Downloaded ${gh}.json — commit it to profiles/${gh}.json (see profiles/README.md) to show up on the team view.`);
 });
 
 // theme changes re-draw (colors are read from CSS at draw time)

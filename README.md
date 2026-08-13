@@ -6,6 +6,8 @@ interactive radar-chart explorer for plotting individual and team profiles.
 
 **▶ [Open the interactive explorer](https://vanderbilt-data-science.github.io/ds-skills-inventory/ds-skills-explorer.html)** — set nine sliders, load an archetype, overlay a comparison, export SVG or PNG.
 
+**▶ [See the team view](https://vanderbilt-data-science.github.io/ds-skills-inventory/team.html)** — everyone who's saved a profile to [`profiles/`](profiles/), as a gallery plus a team-gaps summary.
+
 ![Skills radar](ds-skills-radar.svg)
 
 ## Where this comes from
@@ -205,6 +207,8 @@ exercise on the axis this revision added.
 | File | What it is |
 |---|---|
 | [`ds-skills-explorer.html`](ds-skills-explorer.html) | **Interactive explorer.** Single self-contained file — no build, no dependencies. |
+| [`team.html`](team.html) | **Team view.** Reads every profile in `profiles/` live from GitHub and renders a gallery plus a team-gaps summary — no backend, git is the database. |
+| [`profiles/`](profiles/) | One JSON file per person, committed via the same PR workflow as everything else. See [`profiles/README.md`](profiles/README.md) for the schema. |
 | [`ds-skills-radar.svg`](ds-skills-radar.svg) | Standalone vector radar of the sample profile, hand-editable, sized for projection. |
 | [`make_svg.py`](make_svg.py) | Generator for the SVG. Skills, values, and clusters are a plain Python list at the top. Standard library only. |
 | [`skills-assessment.md`](skills-assessment.md) | The taxonomy: what changed and why, the 0–4 rung ladders, implications for the archetypes, and what was considered and set aside. |
@@ -227,6 +231,31 @@ dependencies, so it works offline and off a USB stick.
 - **Export** downloads the current chart as SVG (vector, editable) or PNG
   (paste into slides), and "Copy values" gives you the raw numbers.
 - **Light and dark** are both hand-tuned; the chart follows your OS theme.
+- **Save profile (JSON)** downloads your profile under your GitHub username —
+  commit it to `profiles/` to appear on the [team view](team.html) (see below).
+
+## Team view
+
+[`team.html`](team.html) answers "what does the team look like, and where's
+the shared gap?" (issue #6) without a real backend: **git is the database.**
+Every teammate's profile is a JSON file committed to [`profiles/`](profiles/)
+the normal way — edit or add your file and open a PR — and the page reads the
+folder straight from GitHub's public API at load time, client-side, no server.
+The team is simply whoever has a file there; there's no separate roster to
+keep in sync.
+
+- **Gallery** — a mini radar per person, name linked to their GitHub profile.
+- **Team gaps** — the average, min, and max for each axis across everyone's
+  profile, with the single lowest-average axis called out.
+- **History** isn't tracked yet beyond git's own commit history — see issues
+  #13 / #25 if you want to build that on top of this.
+
+One trade-off worth knowing: because reads go through the public GitHub API
+against a public repo, anything committed to `profiles/` is visible to anyone
+who can see this repository — there's no per-team privacy boundary. Pairing
+people against a project's required skills (the other half of issue #6) is
+intentionally left for a follow-up issue; this is the profile-sharing
+foundation it would build on.
 
 ## Editing the graphics
 
