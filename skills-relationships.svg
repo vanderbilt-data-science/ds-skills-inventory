@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 1196" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+<!--
+  Skills relationship diagram (2026 revision) - editable
+  HOW TO EDIT: change NODES / EDGES / PILLS in make_relationships_svg.py and rerun.
+  Card fill/border = cluster color (same four as ds-skills-radar.svg).
+  Pills below each title = cross-cutting foundational abilities (see legend).
+  Solid arrow = "builds on", explicit language in skill-level-rubric.md.
+  Dashed arrow = "builds on", structural reading (no direct quote).
+  Dotted band arrow = AI Agents & Frameworks as capacity multiplier on every axis.
+  Dashed double arrow = "overlaps with", a peer relationship, not a hierarchy.
+-->
+<rect width="1300" height="1196" fill="#fcfcfb"/>
+<text x="650" y="50" text-anchor="middle" font-size="30" font-weight="700" fill="#0b0b0b">How the Nine Skills Relate</text>
+<text x="650" y="78" text-anchor="middle" font-size="16" fill="#52514e">Foundational abilities, overlaps (pills), and build order (arrows) — companion to skills-relationships.md</text>
+<g font-size="13" font-weight="700" fill="#898781" text-anchor="middle" letter-spacing="1">
+<text x="650" y="140">HUMAN INTERFACE — DELIVERY</text>
+<text x="650" y="410">ANALYTICAL &amp; TECHNICAL CORE</text>
+<text x="650" y="640">SUBSTRATE</text>
+</g>
+<g opacity="0.45">
+<line x1="1215" y1="872" x2="1215" y2="100" stroke="#eb6834" stroke-width="8" stroke-dasharray="2 13" stroke-linecap="round"/>
+</g>
+<polygon points="1215,100 1221,112 1209,112" fill="#eb6834"/>
+<text x="1215" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#eb6834">multiplies every axis</text>
+<g>
+<line x1="398" y1="664" x2="272" y2="526" stroke="#52514e" stroke-width="1.6" stroke-dasharray="6 6"/>
+<polygon points="272,526 281.4,529.6 274.7,535.7" fill="#52514e"/>
+<circle cx="335" cy="595" r="11" fill="#fcfcfb" stroke="#52514e" stroke-width="1.4"/>
+<text x="335" y="599" text-anchor="middle" font-size="11.5" font-weight="700" fill="#52514e">1</text>
+<line x1="482" y1="664" x2="608" y2="526" stroke="#52514e" stroke-width="1.6"/>
+<polygon points="608,526 605.3,535.7 598.6,529.6" fill="#52514e"/>
+<circle cx="545" cy="595" r="11" fill="#fcfcfb" stroke="#52514e" stroke-width="1.4"/>
+<text x="545" y="599" text-anchor="middle" font-size="11.5" font-weight="700" fill="#52514e">2</text>
+<line x1="740" y1="666.2" x2="350" y2="523.8" stroke="#52514e" stroke-width="1.6" stroke-dasharray="6 6"/>
+<polygon points="350,523.8 360,522.7 356.9,531.1" fill="#52514e"/>
+<circle cx="545" cy="595" r="11" fill="#fcfcfb" stroke="#52514e" stroke-width="1.4"/>
+<text x="545" y="599" text-anchor="middle" font-size="11.5" font-weight="700" fill="#52514e">3</text>
+<line x1="840.7" y1="664" x2="669.3" y2="256" stroke="#52514e" stroke-width="1.6" stroke-dasharray="6 6"/>
+<polygon points="669.3,256 677,262.6 668.7,266" fill="#52514e"/>
+<circle cx="755" cy="460" r="11" fill="#fcfcfb" stroke="#52514e" stroke-width="1.4"/>
+<text x="755" y="464" text-anchor="middle" font-size="11.5" font-weight="700" fill="#52514e">4</text>
+<line x1="350" y1="480" x2="530" y2="480" stroke="#52514e" stroke-width="1.6"/>
+<polygon points="530,480 521,484.5 521,475.5" fill="#52514e"/>
+<circle cx="440" cy="480" r="11" fill="#fcfcfb" stroke="#52514e" stroke-width="1.4"/>
+<text x="440" y="484" text-anchor="middle" font-size="11.5" font-weight="700" fill="#52514e">5</text>
+<line x1="230" y1="434" x2="230" y2="256" stroke="#52514e" stroke-width="1.6" stroke-dasharray="6 6"/>
+<polygon points="230,256 234.5,265 225.5,265" fill="#52514e"/>
+<circle cx="230" cy="345" r="11" fill="#fcfcfb" stroke="#52514e" stroke-width="1.4"/>
+<text x="230" y="349" text-anchor="middle" font-size="11.5" font-weight="700" fill="#52514e">6</text>
+<line x1="350" y1="210" x2="530" y2="210" stroke="#52514e" stroke-width="1.6" stroke-dasharray="6 6"/>
+<polygon points="530,210 521,214.5 521,205.5" fill="#52514e"/>
+<circle cx="440" cy="210" r="11" fill="#fcfcfb" stroke="#52514e" stroke-width="1.4"/>
+<text x="440" y="214" text-anchor="middle" font-size="11.5" font-weight="700" fill="#52514e">7</text>
+</g>
+<line x1="1070" y1="872" x2="1070" y2="526" stroke="#1baf7a" stroke-width="1.8" stroke-dasharray="3 6"/>
+<polygon points="1070,526 1074.5,535 1065.5,535" fill="#1baf7a"/>
+<text x="1195" y="699" text-anchor="end" font-size="11.5" fill="#1baf7a" font-style="italic">verification cap (§4)</text>
+<line x1="770" y1="210" x2="950" y2="210" stroke="#c2478c" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+<polygon points="950,210 941,214.5 941,205.5" fill="#c2478c"/>
+<polygon points="770,210 779,205.5 779,214.5" fill="#c2478c"/>
+<text x="860" y="200" text-anchor="middle" font-size="11.5" fill="#c2478c" font-style="italic">overlap: audience translation, different mechanism</text>
+<rect x="110" y="164" width="240" height="92" rx="12" fill="#eda100" fill-opacity="0.10" stroke="#eda100" stroke-width="1.8"/>
+<text x="230" y="194" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">Visualization</text>
+<rect x="151.8" y="210" width="72" height="22" rx="11" fill="#c2478c" fill-opacity="0.16" stroke="#c2478c" stroke-width="1"/>
+<text x="187.8" y="225" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c2478c">Audience</text>
+<rect x="229.8" y="210" width="78.5" height="22" rx="11" fill="#1a8fa3" fill-opacity="0.16" stroke="#1a8fa3" stroke-width="1"/>
+<text x="269" y="225" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1a8fa3">Uncertain</text>
+<rect x="530" y="164" width="240" height="92" rx="12" fill="#eda100" fill-opacity="0.10" stroke="#eda100" stroke-width="1.8"/>
+<text x="650" y="194" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">Communication</text>
+<rect x="571.8" y="210" width="72" height="22" rx="11" fill="#c2478c" fill-opacity="0.16" stroke="#c2478c" stroke-width="1"/>
+<text x="607.8" y="225" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c2478c">Audience</text>
+<rect x="649.8" y="210" width="78.5" height="22" rx="11" fill="#1a8fa3" fill-opacity="0.16" stroke="#1a8fa3" stroke-width="1"/>
+<text x="689" y="225" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1a8fa3">Uncertain</text>
+<rect x="950" y="164" width="240" height="92" rx="12" fill="#eda100" fill-opacity="0.10" stroke="#eda100" stroke-width="1.8"/>
+<text x="1070" y="194" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">Storytelling</text>
+<rect x="1034" y="210" width="72" height="22" rx="11" fill="#c2478c" fill-opacity="0.16" stroke="#c2478c" stroke-width="1"/>
+<text x="1070" y="225" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c2478c">Audience</text>
+<rect x="110" y="434" width="240" height="92" rx="12" fill="#2a78d6" fill-opacity="0.10" stroke="#2a78d6" stroke-width="1.8"/>
+<text x="230" y="464" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">Statistics &amp; Modeling</text>
+<rect x="132.2" y="480" width="46" height="22" rx="11" fill="#7b5ea7" fill-opacity="0.16" stroke="#7b5ea7" stroke-width="1"/>
+<text x="155.2" y="495" text-anchor="middle" font-size="11.5" font-weight="600" fill="#7b5ea7">Spec</text>
+<rect x="184.2" y="480" width="78.5" height="22" rx="11" fill="#1a8fa3" fill-opacity="0.16" stroke="#1a8fa3" stroke-width="1"/>
+<text x="223.5" y="495" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1a8fa3">Uncertain</text>
+<rect x="268.8" y="480" width="59" height="22" rx="11" fill="#8a7a3c" fill-opacity="0.16" stroke="#8a7a3c" stroke-width="1"/>
+<text x="298.2" y="495" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a7a3c">Domain</text>
+<rect x="530" y="434" width="240" height="92" rx="12" fill="#eb6834" fill-opacity="0.10" stroke="#eb6834" stroke-width="1.8"/>
+<text x="650" y="464" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">AI Foundations</text>
+<rect x="578.2" y="480" width="59" height="22" rx="11" fill="#c0392b" fill-opacity="0.16" stroke="#c0392b" stroke-width="1"/>
+<text x="607.8" y="495" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c0392b">Verify</text>
+<rect x="643.2" y="480" width="78.5" height="22" rx="11" fill="#1a8fa3" fill-opacity="0.16" stroke="#1a8fa3" stroke-width="1"/>
+<text x="682.5" y="495" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1a8fa3">Uncertain</text>
+<rect x="950" y="434" width="240" height="92" rx="12" fill="#1baf7a" fill-opacity="0.10" stroke="#1baf7a" stroke-width="1.8"/>
+<text x="1070" y="464" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">Programming</text>
+<rect x="1004.8" y="480" width="59" height="22" rx="11" fill="#c0392b" fill-opacity="0.16" stroke="#c0392b" stroke-width="1"/>
+<text x="1034.2" y="495" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c0392b">Verify</text>
+<rect x="1069.8" y="480" width="65.5" height="22" rx="11" fill="#52618f" fill-opacity="0.16" stroke="#52618f" stroke-width="1"/>
+<text x="1102.5" y="495" text-anchor="middle" font-size="11.5" font-weight="600" fill="#52618f">Systems</text>
+<rect x="320" y="664" width="240" height="92" rx="12" fill="#1baf7a" fill-opacity="0.10" stroke="#1baf7a" stroke-width="1.8"/>
+<text x="440" y="694" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">Data Engineering</text>
+<rect x="374.8" y="710" width="65.5" height="22" rx="11" fill="#52618f" fill-opacity="0.16" stroke="#52618f" stroke-width="1"/>
+<text x="407.5" y="725" text-anchor="middle" font-size="11.5" font-weight="600" fill="#52618f">Systems</text>
+<rect x="446.2" y="710" width="59" height="22" rx="11" fill="#8a7a3c" fill-opacity="0.16" stroke="#8a7a3c" stroke-width="1"/>
+<text x="475.8" y="725" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a7a3c">Domain</text>
+<rect x="740" y="664" width="240" height="92" rx="12" fill="#eda100" fill-opacity="0.10" stroke="#eda100" stroke-width="1.8"/>
+<text x="860" y="694" text-anchor="middle" font-size="17" font-weight="700" fill="#0b0b0b">Domain Knowledge</text>
+<rect x="798" y="710" width="59" height="22" rx="11" fill="#8a7a3c" fill-opacity="0.16" stroke="#8a7a3c" stroke-width="1"/>
+<text x="827.5" y="725" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a7a3c">Domain</text>
+<rect x="863" y="710" width="59" height="22" rx="11" fill="#c0392b" fill-opacity="0.16" stroke="#c0392b" stroke-width="1"/>
+<text x="892.5" y="725" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c0392b">Verify</text>
+<rect x="60" y="828" width="1180" height="88" rx="14" fill="#eb6834" fill-opacity="0.12" stroke="#eb6834" stroke-width="1.8"/>
+<text x="650" y="858" text-anchor="middle" font-size="17" font-weight="700" fill="#eb6834">AI Agents &amp; Frameworks — the multiplier: raises effective capacity on every other axis</text>
+<rect x="558.8" y="874" width="59" height="22" rx="11" fill="#c0392b" fill-opacity="0.16" stroke="#c0392b" stroke-width="1"/>
+<text x="588.2" y="889" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c0392b">Verify</text>
+<rect x="623.8" y="874" width="46" height="22" rx="11" fill="#7b5ea7" fill-opacity="0.16" stroke="#7b5ea7" stroke-width="1"/>
+<text x="646.8" y="889" text-anchor="middle" font-size="11.5" font-weight="600" fill="#7b5ea7">Spec</text>
+<rect x="675.8" y="874" width="65.5" height="22" rx="11" fill="#52618f" fill-opacity="0.16" stroke="#52618f" stroke-width="1"/>
+<text x="708.5" y="889" text-anchor="middle" font-size="11.5" font-weight="600" fill="#52618f">Systems</text>
+<text x="60" y="930" font-size="13" font-weight="700" fill="#0b0b0b">Build-order key (numbered arrows above)</text>
+<g font-size="11.5" fill="#52514e">
+<circle cx="69" cy="950" r="9" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+<text x="69" y="954" text-anchor="middle" font-size="10.5" font-weight="700" fill="#52514e">1</text>
+<text x="86" y="954">Data Engineering → Statistics &amp; Modeling — reliable extracts underlie a defensible spec</text>
+<circle cx="69" cy="970" r="9" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+<text x="69" y="974" text-anchor="middle" font-size="10.5" font-weight="700" fill="#52514e">2</text>
+<text x="86" y="974">Data Engineering → AI Foundations — corpora / retrieval fork (Data Engineering §3)</text>
+<circle cx="69" cy="990" r="9" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+<text x="69" y="994" text-anchor="middle" font-size="10.5" font-weight="700" fill="#52514e">3</text>
+<text x="86" y="994">Domain Knowledge → Statistics &amp; Modeling — knowing what the data can answer</text>
+<circle cx="69" cy="1010" r="9" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+<text x="69" y="1014" text-anchor="middle" font-size="10.5" font-weight="700" fill="#52514e">4</text>
+<text x="86" y="1014">Domain Knowledge → Communication — domain credibility carries the room</text>
+<circle cx="689" cy="950" r="9" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+<text x="689" y="954" text-anchor="middle" font-size="10.5" font-weight="700" fill="#52514e">5</text>
+<text x="706" y="954">Statistics &amp; Modeling → AI Foundations — “Bayesian lens ... AI and ML model behavior” (Statistics §3)</text>
+<circle cx="689" cy="970" r="9" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+<text x="689" y="974" text-anchor="middle" font-size="10.5" font-weight="700" fill="#52514e">6</text>
+<text x="706" y="974">Statistics &amp; Modeling → Visualization — uncertainty must be encoded, not just estimated</text>
+<circle cx="689" cy="990" r="9" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+<text x="689" y="994" text-anchor="middle" font-size="10.5" font-weight="700" fill="#52514e">7</text>
+<text x="706" y="994">Visualization → Communication — the artifact feeds the framing</text>
+</g>
+<text x="60" y="1064" font-size="13" font-weight="700" fill="#0b0b0b">Cross-cutting abilities (pills)</text>
+<g font-size="11.5">
+<rect x="60" y="1075" width="59" height="20" rx="10" fill="#c0392b" fill-opacity="0.16" stroke="#c0392b"/>
+<text x="89.5" y="1090" text-anchor="middle" font-size="11" font-weight="600" fill="#c0392b">Verify</text>
+<text x="127" y="1090" fill="#52514e">Verification &amp; evaluation judgment</text>
+<rect x="480" y="1075" width="46" height="20" rx="10" fill="#7b5ea7" fill-opacity="0.16" stroke="#7b5ea7"/>
+<text x="503" y="1090" text-anchor="middle" font-size="11" font-weight="600" fill="#7b5ea7">Spec</text>
+<text x="534" y="1090" fill="#52514e">Specification &amp; decomposition</text>
+<rect x="900" y="1075" width="78.5" height="20" rx="10" fill="#1a8fa3" fill-opacity="0.16" stroke="#1a8fa3"/>
+<text x="939.2" y="1090" text-anchor="middle" font-size="11" font-weight="600" fill="#1a8fa3">Uncertain</text>
+<text x="986.5" y="1090" fill="#52514e">Honest uncertainty &amp; limits</text>
+<rect x="60" y="1101" width="72" height="20" rx="10" fill="#c2478c" fill-opacity="0.16" stroke="#c2478c"/>
+<text x="96" y="1116" text-anchor="middle" font-size="11" font-weight="600" fill="#c2478c">Audience</text>
+<text x="140" y="1116" fill="#52514e">Audience translation</text>
+<rect x="480" y="1101" width="65.5" height="20" rx="10" fill="#52618f" fill-opacity="0.16" stroke="#52618f"/>
+<text x="512.8" y="1116" text-anchor="middle" font-size="11" font-weight="600" fill="#52618f">Systems</text>
+<text x="553.5" y="1116" fill="#52514e">Systems &amp; durability</text>
+<rect x="900" y="1101" width="59" height="20" rx="10" fill="#8a7a3c" fill-opacity="0.16" stroke="#8a7a3c"/>
+<text x="929.5" y="1116" text-anchor="middle" font-size="11" font-weight="600" fill="#8a7a3c">Domain</text>
+<text x="967" y="1116" fill="#52514e">Domain-grounded judgment</text>
+</g>
+<g font-size="12" fill="#52514e">
+<line x1="60" y1="1162" x2="95" y2="1162" stroke="#52514e" stroke-width="1.6"/>
+<text x="102" y="1166">builds on — explicit in rubric</text>
+<line x1="330" y1="1162" x2="365" y2="1162" stroke="#52514e" stroke-width="1.6" stroke-dasharray="6 6"/>
+<text x="372" y="1166">builds on — inferred</text>
+<line x1="580" y1="1162" x2="615" y2="1162" stroke="#c2478c" stroke-width="2" stroke-dasharray="1 7"/>
+<text x="622" y="1166">overlaps with (peer, not hierarchy)</text>
+<line x1="900" y1="1162" x2="935" y2="1162" stroke="#eb6834" stroke-width="6" stroke-dasharray="2 8"/>
+<text x="942" y="1166">AI Agents multiplies every axis</text>
+</g>
+</svg>

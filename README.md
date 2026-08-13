@@ -209,6 +209,8 @@ exercise on the axis this revision added.
 | [`make_svg.py`](make_svg.py) | Generator for the SVG. Skills, values, and clusters are a plain Python list at the top. Standard library only. |
 | [`skills-assessment.md`](skills-assessment.md) | The taxonomy: what changed and why, the 0–4 rung ladders, implications for the archetypes, and what was considered and set aside. |
 | [`skill-level-rubric.md`](skill-level-rubric.md) | **The rating rubric.** Behaviorally anchored 0–4 ladders for all nine axes, calibration rules, and the procedure for turning nine numbers into a portrait. |
+| [`skills-relationships.md`](skills-relationships.md) | How the nine axes relate: one foundational ability per axis, the six abilities that cut across axes, where axes look alike but aren't, and build order. |
+| [`skills-relationships.svg`](skills-relationships.svg) / [`make_relationships_svg.py`](make_relationships_svg.py) | The dependency/overlap diagram for the above, and its generator (same edit-and-rerun convention as `make_svg.py`). |
 | [`vis-design-rationale.md`](vis-design-rationale.md) | Why the visualization looks and behaves the way it does — including an honest accounting of radar charts' weaknesses and how each is managed. |
 
 ## Using the explorer
