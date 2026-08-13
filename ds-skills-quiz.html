@@ -15,6 +15,8 @@
     --grid: #e1e0d9;
     --border: rgba(11,11,11,0.10);
     --series-1: #2a78d6;
+    --ok: #1baf7a;
+    --warn: #eb6834;
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) .viz-root {
@@ -27,6 +29,8 @@
       --grid: #2c2c2a;
       --border: rgba(255,255,255,0.10);
       --series-1: #3987e5;
+      --ok: #199e70;
+      --warn: #d95926;
     }
   }
   * { box-sizing: border-box; margin: 0; }
@@ -71,6 +75,22 @@
   button:hover { border-color: var(--text-muted); }
   button.primary { background: var(--series-1); color: #fff; border-color: var(--series-1); }
   button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  .result-table th, .result-table td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .result-table th { color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .conf-evidenced { color: var(--ok); font-weight: 600; }
+  .conf-estimated { color: var(--warn); font-weight: 600; }
+  .note {
+    font-size: 12.5px; color: var(--text-secondary); background: var(--page);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 14px;
+  }
+  .note a { color: var(--series-1); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+  pre {
+    background: var(--page); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; font-size: 12px; overflow-x: auto; white-space: pre-wrap;
+  }
 </style>
 </head>
 <body class="viz-root">
@@ -380,21 +400,104 @@ function goBack() {
   render();
 }
 
-// ---------------- results (placeholder table — portrait/export/archetype match come later) ----------------
+// ---------------- results (portrait: archetype match, copy values, YAML export) ----------------
+// Archetype vectors from skill-level-rubric.md §6, in the explorer's SKILLS order:
+// [stats, aifound, agents, prog, dataeng, viz, comm, story, domain]
+const ARCHETYPES = {
+  "Balanced 2026 DS": [3, 3, 3, 2, 2, 3, 3, 3, 2],
+  "The Guide":        [2, 2, 3, 1, 1, 4, 4, 4, 2],
+  "The Builder":      [3, 2, 3, 3, 3, 2, 2, 3, 2],
+  "The Architect":    [2, 3, 3, 4, 4, 2, 2, 2, 3],
+  "The Visionary":    [3, 4, 4, 2, 2, 2, 3, 3, 4],
+  "The Toolmaker":    [2, 4, 4, 3, 2, 2, 2, 1, 2],
+};
+
+function nearestArchetype(vec) {
+  let best = null, bestDiff = Infinity;
+  for (const [name, v] of Object.entries(ARCHETYPES)) {
+    const diff = v.reduce((sum, x, i) => sum + Math.abs(x - vec[i]), 0) / v.length;
+    if (diff < bestDiff) { bestDiff = diff; best = name; }
+  }
+  return { name: best, diff: bestDiff };
+}
+
 function renderResults() {
-  const panel = document.createElement("div");
-  panel.className = "panel";
+  const vec = AXES.map((axis, i) => results[i].level);
+  const nearest = nearestArchetype(vec);
+  const progIdx = AXES.findIndex(a => a.id === "prog");
+  const progResult = results[progIdx];
+
   const rows = AXES.map((axis, i) => {
     const r = results[i];
-    const decayNote = axis.type === "agents" && r.currencyDecay ? ` (pre-decay ${r.preDecayLevel})` : "";
-    return `<tr><td>${axis.label}</td><td>${r.level}${decayNote}</td><td>${r.confidence}</td></tr>`;
+    let scoreCell = String(r.level);
+    if (axis.type === "agents" && r.currencyDecay) {
+      scoreCell += ` <span style="color:var(--text-muted)">(pre-decay ${r.preDecayLevel}, currency −${r.currencyDecay})</span>`;
+    }
+    if (axis.type === "programming") {
+      scoreCell += ` <span style="color:var(--text-muted)">(A=${r.dialA}, B=${r.dialB}: min(mean, B+1))</span>`;
+    }
+    const confClass = r.confidence === "evidenced" ? "conf-evidenced" : r.confidence === "estimated" ? "conf-estimated" : "";
+    return `<tr><td>${axis.label}</td><td>${scoreCell}</td><td class="${confClass}">${r.confidence}</td></tr>`;
   }).join("");
-  panel.innerHTML = `<div class="q-title">Results so far</div>
-    <table style="width:100%; border-collapse:collapse; font-size:13px">
-      <thead><tr><th style="text-align:left; padding:6px">Axis</th><th style="text-align:left; padding:6px">Level</th><th style="text-align:left; padding:6px">Confidence</th></tr></thead>
+
+  const copyText = AXES.map((axis, i) => `${axis.label}: ${results[i].level}`).join("\n");
+
+  const portraitYaml = `portrait:
+  name:
+  date: ${new Date().toISOString().slice(0, 10)}
+  context:
+  scores:
+${AXES.map((axis, i) => `    ${axis.id}: ${results[i].level}`).join("\n")}
+  programming_dials:
+    agentic: ${progResult.dialA}
+    unaided: ${progResult.dialB}
+  confidence:
+${AXES.map((axis, i) => `    ${axis.id}: ${results[i].confidence}`).join("\n")}
+  nearest_archetype: ${nearest.name} (mean diff ${nearest.diff.toFixed(2)})
+  target:
+  fast_gaps:
+  slow_gaps:
+  preference:
+  next_three_moves:
+`;
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `
+    <div class="q-title">Your portrait</div>
+    <table class="result-table">
+      <thead><tr><th>Axis</th><th>Score</th><th>Confidence</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table>`;
+    </table>
+    <div class="note"><b>Nearest archetype:</b> ${nearest.name}
+      (mean difference ${nearest.diff.toFixed(2)}${nearest.diff > 1 ? " — you're your own shape" : ""})</div>
+    <div class="toolbar">
+      <button id="copyBtn">Copy values (for the explorer sliders)</button>
+      <button id="downloadBtn">Download portrait.yaml</button>
+      <button id="restartBtn">Start over</button>
+    </div>
+    <pre>${copyText}</pre>
+    <div class="note">Paste these into the <a href="ds-skills-explorer.html">explorer</a> sliders to plot your radar,
+    or open <code>portrait.yaml</code> and fill in the reflection fields per the rubric's §6.</div>
+  `;
   host.appendChild(panel);
+
+  panel.querySelector("#copyBtn").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(copyText); } catch (e) { /* clipboard unavailable */ }
+  });
+  panel.querySelector("#downloadBtn").addEventListener("click", () => {
+    const blob = new Blob([portraitYaml], { type: "text/yaml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "portrait.yaml";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  panel.querySelector("#restartBtn").addEventListener("click", () => {
+    axisIdx = 0; subIdx = 0; showResults = false; history.length = 0;
+    results.forEach(r => { for (const k in r) delete r[k]; });
+    render();
+  });
 }
 
 render();
