@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Scientist Skills — Team View</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;
+    --c-analytical: #2a78d6;
+    --c-aiera: #eb6834;
+    --c-eng: #1baf7a;
+    --c-human: #eda100;
+    --warn-bg: rgba(235,104,52,0.14);
+    --warn-fg: #a63c14;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --c-analytical: #3987e5;
+      --c-aiera: #d95926;
+      --c-eng: #199e70;
+      --c-human: #c98500;
+      --warn-bg: rgba(217,89,38,0.22);
+      --warn-fg: #f0a184;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body.viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; padding: 24px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { color: var(--text-secondary); font-size: 13.5px; margin-top: 4px; }
+  header a { color: var(--series-1); }
+  .panel {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px; margin-top: 18px;
+  }
+  .panel h2 { font-size: 15px; margin-bottom: 12px; }
+  #status { font-size: 13.5px; color: var(--text-secondary); }
+  #status.error { color: var(--warn-fg); background: var(--warn-bg); border-radius: 8px; padding: 10px 12px; }
+  .callout {
+    font-size: 13.5px; background: var(--warn-bg); color: var(--warn-fg);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 14px;
+  }
+  .gap-row { display: grid; grid-template-columns: 170px 1fr 90px; gap: 10px; align-items: center; margin-bottom: 7px; font-size: 13px; }
+  .gap-row .bar-track { background: var(--grid); border-radius: 5px; height: 9px; overflow: hidden; }
+  .gap-row .bar-fill { background: var(--series-1); height: 100%; }
+  .gap-row .nums { color: var(--text-secondary); font-variant-numeric: tabular-nums; text-align: right; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+  }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px; text-align: center;
+  }
+  .card .cname { font-size: 13.5px; font-weight: 600; margin-top: 4px; }
+  .card .cname a { color: inherit; text-decoration: none; }
+  .card .cname a:hover { text-decoration: underline; }
+  .card .cupdated { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .footnote { font-size: 12px; color: var(--text-muted); margin-top: 16px; }
+  .footnote a { color: var(--series-1); }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Team Skills Overview</h1>
+    <p>Every profile committed under <code>profiles/</code> in this repo, read live from GitHub &mdash; no separate roster. &middot; <a href="ds-skills-explorer.html">&larr; Back to the explorer</a></p>
+  </header>
+
+  <div class="panel">
+    <h2>Team gaps</h2>
+    <div id="status">Loading team profiles from GitHub&hellip;</div>
+    <div id="gaps" style="display:none"></div>
+  </div>
+
+  <div class="panel" id="galleryPanel" style="display:none">
+    <h2>Portraits</h2>
+    <div class="grid" id="gallery"></div>
+  </div>
+
+  <p class="footnote">Not seeing yourself? Save a profile from the <a href="ds-skills-explorer.html">explorer</a> and commit it to <code>profiles/&lt;your-github-username&gt;.json</code> &mdash; see <a href="profiles/README.md">profiles/README.md</a> for the exact steps and schema.</p>
+</div>
+
+<script>
+// Must match the explorer's SKILLS order/labels exactly (see profiles/README.md).
+const SKILLS = [
+  { label: "Statistics & Modeling",   varName: "--c-analytical" },
+  { label: "AI Foundations",          varName: "--c-aiera" },
+  { label: "AI Agents & Frameworks",  varName: "--c-aiera" },
+  { label: "Programming",             varName: "--c-eng" },
+  { label: "Data Engineering",        varName: "--c-eng" },
+  { label: "Visualization",           varName: "--c-human" },
+  { label: "Communication",           varName: "--c-human" },
+  { label: "Storytelling",            varName: "--c-human" },
+  { label: "Domain Knowledge",        varName: "--c-human" },
+];
+const N = SKILLS.length, MAXV = 4;
+const OWNER = "vanderbilt-data-science", REPO = "ds-skills-inventory";
+const svgNS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.body).getPropertyValue(v).trim();
+
+function isValidProfile(p) {
+  return p && typeof p.github === "string" && p.github &&
+    Array.isArray(p.values) && p.values.length === N &&
+    p.values.every(v => typeof v === "number" && v >= 0 && v <= MAXV);
+}
+
+async function fetchProfiles() {
+  const listRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/profiles`,
+    { headers: { Accept: "application/vnd.github+json" } });
+  if (!listRes.ok) throw new Error(`GitHub API returned ${listRes.status}`);
+  const entries = await listRes.json();
+  const files = entries.filter(e => e.type === "file" && e.name.toLowerCase().endsWith(".json"));
+  const profiles = [];
+  for (const f of files) {
+    try {
+      const res = await fetch(f.download_url);
+      const data = await res.json();
+      if (isValidProfile(data)) profiles.push(data);
+      else console.warn(`Skipped ${f.name}: doesn't match the profiles/README.md schema.`);
+    } catch (e) {
+      console.warn(`Skipped ${f.name}:`, e);
+    }
+  }
+  return profiles;
+}
+
+// ---------------- mini radar ----------------
+function miniRadar(values, size) {
+  const cx = size / 2, cy = size / 2, r = size * 0.38;
+  const angle = i => -Math.PI / 2 + 2 * Math.PI * i / N;
+  const pt = (i, rad) => [cx + rad * Math.cos(angle(i)), cy + rad * Math.sin(angle(i))];
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+  svg.setAttribute("width", size); svg.setAttribute("height", size);
+  const ring = document.createElementNS(svgNS, "circle");
+  ring.setAttribute("cx", cx); ring.setAttribute("cy", cy); ring.setAttribute("r", r);
+  ring.setAttribute("fill", "none"); ring.setAttribute("stroke", css("--grid"));
+  svg.appendChild(ring);
+  const pts = values.map((v, i) => pt(i, r * v / MAXV).join(",")).join(" ");
+  const poly = document.createElementNS(svgNS, "polygon");
+  poly.setAttribute("points", pts);
+  poly.setAttribute("fill", css("--series-1")); poly.setAttribute("fill-opacity", "0.28");
+  poly.setAttribute("stroke", css("--series-1")); poly.setAttribute("stroke-width", "1.5");
+  poly.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(poly);
+  return svg;
+}
+
+// ---------------- aggregate (team gaps) ----------------
+function renderGaps(profiles) {
+  const stats = SKILLS.map((s, i) => {
+    const vals = profiles.map(p => p.values[i]);
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { label: s.label, avg, min: Math.min(...vals), max: Math.max(...vals) };
+  });
+  const weakest = stats.reduce((a, b) => (b.avg < a.avg ? b : a));
+
+  const host = document.getElementById("gaps");
+  host.innerHTML = "";
+  const callout = document.createElement("div");
+  callout.className = "callout";
+  callout.textContent = `Team's biggest shared gap: ${weakest.label}, average ${weakest.avg.toFixed(1)}/4 across ${profiles.length} ${profiles.length === 1 ? "profile" : "profiles"}.`;
+  host.appendChild(callout);
+
+  stats.forEach(s => {
+    const row = document.createElement("div");
+    row.className = "gap-row";
+    row.innerHTML =
+      `<span>${s.label}</span>` +
+      `<span class="bar-track"><span class="bar-fill" style="width:${(s.avg / MAXV * 100).toFixed(0)}%"></span></span>` +
+      `<span class="nums">${s.avg.toFixed(1)} avg (${s.min}&ndash;${s.max})</span>`;
+    host.appendChild(row);
+  });
+}
+
+function renderGallery(profiles) {
+  const host = document.getElementById("gallery");
+  host.innerHTML = "";
+  profiles
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(p => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.appendChild(miniRadar(p.values, 140));
+      const nameEl = document.createElement("div");
+      nameEl.className = "cname";
+      nameEl.innerHTML = `<a href="https://github.com/${p.github}" target="_blank" rel="noopener">${p.name || p.github}</a>`;
+      card.appendChild(nameEl);
+      if (p.updated) {
+        const upd = document.createElement("div");
+        upd.className = "cupdated";
+        upd.textContent = `updated ${p.updated}`;
+        card.appendChild(upd);
+      }
+      host.appendChild(card);
+    });
+  document.getElementById("galleryPanel").style.display = "";
+}
+
+(async function init() {
+  const status = document.getElementById("status");
+  try {
+    const profiles = await fetchProfiles();
+    if (profiles.length === 0) {
+      status.textContent = "No profiles found yet in profiles/ — be the first to save one from the explorer.";
+      return;
+    }
+    status.style.display = "none";
+    document.getElementById("gaps").style.display = "";
+    renderGaps(profiles);
+    renderGallery(profiles);
+  } catch (e) {
+    status.className = "error";
+    status.textContent = "Couldn't load team profiles from GitHub (" + e.message + "). This can happen if the unauthenticated API rate limit was hit — try again shortly.";
+  }
+})();
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => location.reload());
+</script>
+</body>
+</html>
