@@ -98,7 +98,7 @@
   .legend .key { display: inline-flex; align-items: center; gap: 7px; }
   .legend .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
   .tooltip {
-    position: absolute; pointer-events: none; display: none;
+    position: fixed; pointer-events: none; display: none;
     background: var(--surface-1); border: 1px solid var(--border);
     border-radius: 8px; padding: 6px 10px; font-size: 12.5px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.12); z-index: 5; white-space: nowrap;
@@ -106,6 +106,10 @@
   .tooltip .t-name { font-weight: 600; }
   .tooltip .t-val { color: var(--text-secondary); }
   .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .stacked-panel { margin-top: 20px; }
+  .stacked-panel h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  #gapChart { width: 100%; height: auto; display: block; }
+  #gapHint p { font-size: 13px; color: var(--text-secondary); margin: 0; }
 </style>
 </head>
 <body class="viz-root">
@@ -139,6 +143,17 @@
       <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Values are also listed beside each slider.</div>
     </div>
   </div>
+
+  <div class="panel stacked-panel" id="gapPanel" style="display:none;">
+    <h2>Where to lean for <span id="gapTargetName"></span></h2>
+    <p class="footnote" id="gapSummary" style="margin-top:0; margin-bottom:14px;"></p>
+    <svg id="gapChart" viewBox="0 0 1120 460" role="img" aria-label="Skill gap between your profile and the comparison title"></svg>
+    <div class="legend" id="gapLegend"></div>
+    <div class="footnote">Each row is one axis, ranked by size of gap (biggest first). The dots show where you and the comparison title sit on the 0&ndash;4 scale &mdash; a big gap is a skill worth prioritizing if you're aiming at that title; a gap where you're already ahead is a strength to lean on.</div>
+  </div>
+  <div class="panel stacked-panel" id="gapHint">
+    <p>Pick a title in &ldquo;Compare with&rdquo; above &mdash; another data-scientist archetype, or an adjacent title like Data Engineer or Software Developer &mdash; to see which axes matter most for that role and how far your current profile is from it.</p>
+  </div>
 </div>
 
 <script>
@@ -171,6 +186,27 @@ const PRESETS = {
   "The Visionary":   [3, 4, 4, 2, 2, 2, 3, 3, 4],
   "The Toolmaker":   [2, 4, 4, 3, 2, 2, 2, 1, 2],
 };
+// Skill vectors for adjacent titles, scored on the same nine axes and 0-4
+// scale as PRESETS above. These exist for the "Compare with" overlay, for
+// when what you want isn't another data-scientist archetype but a genuinely
+// different job title — "if I want to be a Data Engineer instead, which
+// axes should I actually be leaning into?" They're the same kind of
+// judgment call as the archetypes: a reasonable starting shape per title,
+// grounded in the rubric's own axis definitions (skill-level-rubric.md),
+// meant to be tuned to your own market/team rather than treated as
+// authoritative. Keep them out of PRESETS (and off the "Preset" selector)
+// since this tool's own profile is still a data scientist's — these are
+// only ever a comparison target, never something you "load" as yourself.
+// order: [stats, aifound, agents, prog, dataeng, viz, comm, story, domain]
+const OTHER_TITLES = {
+  "Data Engineer":      [1,   1,   2,   3.5, 4,   1,   1.5, 0.5, 1  ],
+  "Software Developer": [0.5, 1,   2,   4,   1.5, 0.5, 1.5, 0.5, 1  ],
+  "ML Engineer":        [2,   3,   2.5, 3.5, 2.5, 1,   1.5, 1,   1.5],
+  "Data / BI Analyst":  [2,   1,   1.5, 1,   1.5, 3,   2.5, 2,   2  ],
+};
+// Look up a comparison vector by name, whichever bucket it lives in.
+const compareVector = name => (PRESETS[name] || OTHER_TITLES[name] || null);
+
 const N = SKILLS.length, CX = 545, CY = 360, R = 235, MAXV = 4;
 let values = PRESETS["Balanced 2026 DS"].slice();
 
@@ -277,6 +313,94 @@ function draw() {
     t.addEventListener("mouseleave", hideTip);
   });
   drawLegend();
+  drawGapChart();
+}
+
+// ---------------- gap chart (skill emphasis vs. a comparison title) ----------------
+function drawGapChart() {
+  const gapPanel = document.getElementById("gapPanel");
+  const gapHint = document.getElementById("gapHint");
+  const gapSvg = document.getElementById("gapChart");
+
+  if (!compareValues) {
+    gapPanel.style.display = "none";
+    gapHint.style.display = "block";
+    return;
+  }
+  gapHint.style.display = "none";
+  gapPanel.style.display = "block";
+
+  const profileName = document.getElementById("portraitName").value || "Data Scientist";
+  const compareName = compareSel.value;
+  document.getElementById("gapTargetName").textContent = compareName;
+
+  // rank axes by signed gap (target minus current): biggest growth areas
+  // first, biggest surpluses (where you already exceed the target) last.
+  const rows = SKILLS.map((s, i) => ({
+    s, cur: values[i], tgt: compareValues[i], gap: compareValues[i] - values[i],
+  })).sort((a, b) => b.gap - a.gap);
+
+  // "Lean into" only ever means axes the target title needs *more* of than
+  // you currently have — a big gap in the other direction is a strength,
+  // not a lever, so it must never show up as one here.
+  const summary = document.getElementById("gapSummary");
+  const growthAxes = rows.filter(r => r.gap >= 0.5).slice(0, 2);
+  const aheadAxes = rows.filter(r => r.gap <= -0.5).slice(-2).reverse();
+  let summaryText = growthAxes.length
+    ? `Biggest levers toward ${compareName}: ` +
+      growthAxes.map(r => `${r.s.label} (+${r.gap.toFixed(1)})`).join(", ") + "."
+    : `Your current profile already matches or exceeds ${compareName} on every axis.`;
+  if (aheadAxes.length) {
+    summaryText += ` You're already ahead on ${aheadAxes.map(r => r.s.label).join(", ")}.`;
+  }
+  summary.textContent = summaryText;
+
+  document.getElementById("gapLegend").innerHTML =
+    `<span class="key"><span class="swatch" style="background:var(--series-1)"></span>${profileName} (you)</span>` +
+    `<span class="key"><span class="swatch" style="background:var(--series-2)"></span>${compareName}</span>`;
+
+  gapSvg.innerHTML = "";
+  const rowH = 44, top0 = 34, labelX = 4, trackX0 = 250, trackX1 = 1000, gapLabelX = 1030;
+  const H = top0 + rows.length * rowH + 14;
+  gapSvg.setAttribute("viewBox", `0 0 1120 ${H}`);
+  const xFor = v => trackX0 + (trackX1 - trackX0) * (v / MAXV);
+
+  // 0-4 scale ticks, labeled once along the top
+  for (let v = 0; v <= MAXV; v++) {
+    el("text", { x: xFor(v), y: top0 - 16, "text-anchor": "middle", "font-size": 11,
+                 fill: css("--text-muted"), "font-family": "system-ui, sans-serif" }, gapSvg).textContent = v;
+  }
+
+  rows.forEach((r, ri) => {
+    const y = top0 + ri * rowH + rowH / 2;
+    el("text", { x: labelX, y: y + 5, "font-size": 14, "font-weight": 600,
+                 fill: css("--text-primary"), "font-family": "system-ui, sans-serif" }, gapSvg).textContent = r.s.label;
+    el("line", { x1: trackX0, y1: y, x2: trackX1, y2: y, stroke: css("--grid"), "stroke-width": 1 }, gapSvg);
+    for (let v = 0; v <= MAXV; v++) {
+      el("line", { x1: xFor(v), y1: y - 4, x2: xFor(v), y2: y + 4, stroke: css("--grid"), "stroke-width": 1 }, gapSvg);
+    }
+    // connector between where you are and where the title sits
+    el("line", { x1: xFor(r.cur), y1: y, x2: xFor(r.tgt), y2: y,
+                 stroke: css("--text-muted"), "stroke-width": 2, "stroke-linecap": "round" }, gapSvg);
+    const tgtDot = el("circle", { cx: xFor(r.tgt), cy: y, r: 6, fill: css("--series-2") }, gapSvg);
+    const curDot = el("circle", { cx: xFor(r.cur), cy: y, r: 6, fill: css("--series-1") }, gapSvg);
+    tgtDot.addEventListener("mousemove", ev => showGapTip(ev, r, compareName, profileName));
+    curDot.addEventListener("mousemove", ev => showGapTip(ev, r, compareName, profileName));
+    tgtDot.addEventListener("mouseleave", hideTip);
+    curDot.addEventListener("mouseleave", hideTip);
+    const gapText = Math.abs(r.gap) < 0.05 ? "even" : `${r.gap > 0 ? "+" : "−"}${Math.abs(r.gap).toFixed(1)}`;
+    el("text", { x: gapLabelX, y: y + 5, "font-size": 13, "font-weight": 700,
+                 fill: r.gap > 0.05 ? css("--series-2") : (r.gap < -0.05 ? css("--series-1") : css("--text-muted")),
+                 "font-family": "system-ui, sans-serif" }, gapSvg).textContent = gapText;
+  });
+}
+function showGapTip(ev, r, compareName, profileName) {
+  tip.style.display = "block";
+  tip.innerHTML = `<span class="t-name">${r.s.label}</span><br>` +
+    `<span class="t-val">${profileName}: ${r.cur} / 4</span><br>` +
+    `<span class="t-val">${compareName}: ${r.tgt} / 4</span>`;
+  tip.style.left = (ev.clientX + 14) + "px";
+  tip.style.top = (ev.clientY - 10) + "px";
 }
 
 function drawLegend() {
@@ -293,24 +417,33 @@ function drawLegend() {
 // ---------------- tooltip ----------------
 const tip = document.getElementById("tooltip");
 function showTip(ev, i) {
-  const host = svg.parentElement.getBoundingClientRect();
   tip.style.display = "block";
   let html = `<span class="t-name">${SKILLS[i].label}</span> <span class="t-val">${values[i]} / 4</span>`;
   if (compareValues) html += `<br><span class="t-val">vs ${compareValues[i]} / 4</span>`;
   tip.innerHTML = html;
-  tip.style.left = (ev.clientX - host.left + 14) + "px";
-  tip.style.top = (ev.clientY - host.top - 10) + "px";
+  tip.style.left = (ev.clientX + 14) + "px";
+  tip.style.top = (ev.clientY - 10) + "px";
 }
 function hideTip() { tip.style.display = "none"; }
 
 // ---------------- toolbar ----------------
 const presetSel = document.getElementById("preset");
 const compareSel = document.getElementById("compare");
+Object.keys(PRESETS).forEach(name => presetSel.add(new Option(name, name)));
+
+compareSel.add(new Option("None", "None"));
+const dsGroup = document.createElement("optgroup");
+dsGroup.label = "Data Science archetypes";
 Object.keys(PRESETS).forEach(name => {
-  presetSel.add(new Option(name, name));
-  if (name !== "Custom") compareSel.add(new Option(name, name));
+  if (name === "Custom") return;
+  dsGroup.appendChild(new Option(name, name));
 });
-compareSel.add(new Option("None", "None"), 0);
+compareSel.appendChild(dsGroup);
+const titleGroup = document.createElement("optgroup");
+titleGroup.label = "Other titles";
+Object.keys(OTHER_TITLES).forEach(name => titleGroup.appendChild(new Option(name, name)));
+compareSel.appendChild(titleGroup);
+
 compareSel.value = "None";
 presetSel.value = "Balanced 2026 DS";
 
@@ -329,7 +462,7 @@ presetSel.addEventListener("change", () => {
   draw();
 });
 compareSel.addEventListener("change", () => {
-  compareValues = compareSel.value === "None" ? null : PRESETS[compareSel.value].slice();
+  compareValues = compareSel.value === "None" ? null : compareVector(compareSel.value).slice();
   draw();
 });
 document.getElementById("portraitName").addEventListener("input", e => {
