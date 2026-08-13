@@ -125,6 +125,7 @@
     padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px;
   }
   .history-row button { padding: 4px 8px; font-size: 12px; }
+  .history-row button.confirm-danger { background: var(--badge-bg); color: var(--badge-fg); border-color: var(--series-2); }
   .playback {
     display: flex; gap: 10px; align-items: center; margin-top: 14px;
     padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap;
@@ -426,6 +427,7 @@ document.getElementById("portraitName").addEventListener("input", e => {
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
+let pendingDeleteId = null, pendingDeleteTimer = null;
 function renderHistoryList() {
   const host = document.getElementById("historyList");
   const h = historySorted();
@@ -439,7 +441,7 @@ function renderHistoryList() {
         <span>
           <button data-act="load" data-id="${a.id}">Load</button>
           <button data-act="compare" data-id="${a.id}">Compare</button>
-          <button data-act="delete" data-id="${a.id}">Delete</button>
+          <button data-act="delete" data-id="${a.id}" class="${pendingDeleteId === a.id ? "confirm-danger" : ""}">${pendingDeleteId === a.id ? "Confirm delete?" : "Delete"}</button>
         </span>
       </div>`).join("");
   }
@@ -470,9 +472,15 @@ document.getElementById("historyList").addEventListener("click", e => {
     compareSel.value = "history:" + a.id;
     draw();
   } else if (btn.dataset.act === "delete") {
-    if (!confirm(`Delete attempt "${a.name}" (${a.date})?`)) return;
-    history = history.filter(x => x.id !== a.id);
-    persistHistory();
+    clearTimeout(pendingDeleteTimer);
+    if (pendingDeleteId === a.id) {
+      pendingDeleteId = null;
+      history = history.filter(x => x.id !== a.id);
+      persistHistory();
+    } else {
+      pendingDeleteId = a.id;
+      pendingDeleteTimer = setTimeout(() => { pendingDeleteId = null; renderHistoryList(); }, 4000);
+    }
     renderHistoryList();
   }
 });
