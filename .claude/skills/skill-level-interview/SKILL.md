@@ -146,8 +146,32 @@ below) consume.
 
 ## 3. Archetype matching
 
-TODO (task #4): mean-absolute-difference match against the six §6 presets,
-with a "your own shape" fallback.
+Uses the six presets and the matching procedure defined in
+`skill-level-rubric.md` §6. Re-read that table now rather than from memory —
+the preset vectors are exactly the kind of thing that's easy to transpose a
+digit in, and a wrong preset value silently produces a wrong nearest match.
+
+### Procedure
+
+1. Take the finalized nine-value vector from §2 (Scoring) above.
+2. For each of the six presets, compute the mean absolute difference: sum
+   `|your_score - preset_score|` across the nine axes, divide by 9.
+3. The preset with the smallest mean difference is the nearest archetype.
+4. If two presets land within 0.2 of each other, report both — "you sit
+   between X and Y." The rubric calls this common and fine; it is not a tie
+   that needs breaking.
+5. If every preset's mean difference exceeds 1.0, report "your own shape"
+   instead of forcing a match to the closest-but-still-far preset. The
+   rubric explicitly sanctions this outcome, and picking a bad match here
+   would relabel real information (a genuinely unusual profile) as noise.
+
+### Output
+
+Carry forward: the nearest archetype name(s), the mean-difference value(s),
+and the specific axes where the person diverges most from that archetype.
+The results page's next-steps section (§4 below) needs the divergence, not
+just the label — "a Builder except two levels behind on Communication" is
+the useful sentence, not "you're a Builder."
 
 ## 4. Producing results
 
