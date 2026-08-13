@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Scientist Skills Exam</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;
+    --ok: #1baf7a;
+    --warn: #eb6834;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --ok: #199e70;
+      --warn: #d95926;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body.viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { color: var(--text-secondary); font-size: 13.5px; margin-top: 4px; }
+
+  .progress { margin: 18px 0 10px; }
+  .progress-bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--series-1); border-radius: 3px; transition: width .2s; }
+  .progress-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .panel {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px; margin-top: 8px;
+  }
+  .q-title { font-size: 15.5px; font-weight: 600; margin-bottom: 16px; line-height: 1.4; }
+  .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+  .option {
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; font-size: 13.5px; line-height: 1.45;
+  }
+  .option:hover { border-color: var(--text-muted); }
+  .option.selected { border-color: var(--series-1); background: rgba(42,120,214,0.08); }
+  .option input { margin-top: 3px; accent-color: var(--series-1); flex: none; }
+  .option .letter { font-weight: 700; flex: none; width: 16px; }
+
+  .nav { display: flex; justify-content: space-between; margin-top: 18px; }
+  button {
+    font: inherit; font-size: 13.5px; cursor: pointer;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px;
+  }
+  button:hover { border-color: var(--text-muted); }
+  button.primary { background: var(--series-1); color: #fff; border-color: var(--series-1); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .result-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  .result-table th, .result-table td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .result-table th { color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .conf-evidenced { color: var(--ok); font-weight: 600; }
+  .conf-estimated { color: var(--warn); font-weight: 600; }
+  .note {
+    font-size: 12.5px; color: var(--text-secondary); background: var(--page);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 14px;
+  }
+  .note a { color: var(--series-1); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+  pre {
+    background: var(--page); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; font-size: 12px; overflow-x: auto; white-space: pre-wrap;
+  }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Data Scientist Skills Exam</h1>
+    <p>A multiple-choice placement exam against the
+    <a href="skill-level-rubric.md">2026 skill-level rubric</a>. One question at a time.</p>
+  </header>
+
+  <div class="progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+
+  <div id="quizHost"></div>
+</div>
+
+<script>
+// ---------------- exam data (from skill-level-rubric.md §3) ----------------
+// Order matches the explorer's SKILLS order: stats, aifound, agents, prog, dataeng, viz, comm, story, domain
+// type: "standard" (main ladder + artifact/failure gate) | "agents" (also asks a currency question)
+//       | "programming" (two dials, no gate — scored by formula instead)
+const AXES = [
+  {
+    id: "stats", type: "standard", label: "Statistics & Modeling",
+    probe: "One course, two, or beyond into Bayesian? Can you build the model that holds everything else equal — so you can answer whether the campaign worked once seasonality and the acquisition are factored out?",
+    options: [
+      "Coursework or none. You can run a test or a regression when told which one to run.",
+      "One to two courses' worth. You have applied inferential statistics or regression to at least one real question. You pick the method with help and report effects more confidently than uncertainty.",
+      "You choose and defend the specification yourself on real questions — controlling confounds, handling seasonality and repeated measures, checking assumptions, reporting uncertainty honestly. Multiple regression and its extensions are comfortable; you have met Bayesian reasoning and can say what a prior is doing.",
+      "You use frequentist and Bayesian methods where each fits, and you design the study, not just the analysis — experiments, quasi-experimental designs, causal identification and its assumptions. Others bring you their designs before collecting data.",
+      "Research-grade. You develop or extend methods, publish or review, and are consulted on statistical questions beyond your organization."
+    ],
+  },
+  {
+    id: "aifound", type: "standard", label: "AI Foundations",
+    probe: "Could you explain a transformer to someone — and name a decision you would make differently because of what you understand?",
+    options: [
+      "You use models without a mechanistic account of them. Coursework only.",
+      "You have applied classical ML and off-the-shelf foundation models to real problems, and can explain the machinery at block-diagram level: tokens and embeddings, attention, next-token prediction, pre-training versus fine-tuning versus inference.",
+      "You are solid across the major method families and can name which instrument fits — foundation model, classical ML, statistical model, or no model at all. You run error analysis and basic evals and can explain why a model hallucinates.",
+      "Deep grasp of behavior and limits. You design evaluation suites; you know when adaptation (retrieval, fine-tuning, distillation) is worth it and when it isn't; you reason about distribution shift and silent degradation.",
+      "You advance the frontier — novel methods, research-grade work that others build on."
+    ],
+  },
+  {
+    id: "agents", type: "agents", label: "AI Agents & Frameworks",
+    probe: "Are you actually delegating real work — and how do you know the result is right?",
+    options: [
+      "Chat-style use only. You paste a question in and copy an answer out. You are still the one running everything.",
+      "Productive daily delegation. You work inside an agentic harness on real tasks. You write specifications rather than requests — goal, constraints, acceptance criteria. You review everything that comes back.",
+      "You build capability, not just output. You author reusable Agent Skills that encode your own expertise, and someone else has used one. You connect agents to real systems (MCP and equivalents). Verification is in the loop.",
+      "You design systems of agents. Multi-step and multi-agent workflows with real orchestration. Evals, guardrails, and monitoring are designed in, not bolted on. You ship packaged capability others install and use.",
+      "You create novel agent architectures, frameworks, or standards — the patterns other people adopt."
+    ],
+    currencyChoices: [
+      { label: "Within the last 6 months", decay: 0 },
+      { label: "6–12 months ago", decay: 0.5 },
+      { label: "12–18 months ago", decay: 1.0 },
+      { label: "18–24 months ago", decay: 1.5 },
+      { label: "More than 24 months ago, or never", decay: 2.0 },
+    ],
+  },
+  {
+    id: "prog", type: "programming", label: "Programming",
+    probe: "How many languages — and were you the person people brought their bugs to? Then: what have you shipped through an agent that you could defend line by line?",
+    dialA: {
+      name: "Dial A — Agentic delivery", subtitle: "What you can get built and shipped by directing agents.",
+      options: [
+        "None.",
+        "Scripts, notebooks, and small analyses via an agent; you can follow what came back and modify it.",
+        "Multi-file projects with tests and a real git workflow; you can direct a refactor and tell when the agent has gone sideways.",
+        "Production-grade systems: architecture decisions you make and defend, CI, review standards for AI-generated code, several agents in flight at once.",
+        "Systems, tooling, or standards that other builders adopt."
+      ],
+    },
+    dialB: {
+      name: "Dial B — Unaided fluency", subtitle: "What you can read, write, and debug with the agent turned off.",
+      options: [
+        "None.",
+        "One language; you can read a script and change it.",
+        "Two or more languages, or real depth in one. You can read unfamiliar code and locate the bug. You were the person others brought their bugs to.",
+        "You design and write non-trivial software by hand — data structures, performance, debugging under pressure.",
+        "Expert engineer; the separate-engineering-team tier."
+      ],
+    },
+  },
+  {
+    id: "dataeng", type: "standard", label: "Data Engineering",
+    probe: "Have you ever gotten data all the way to a dashboard yourself?",
+    options: [
+      "No hands-on data access experience. Someone hands you a file.",
+      "You can get the data you need — SQL basics (AI-assisted is fine), APIs, file wrangling, warehouse queries. One-off extracts that you check.",
+      "Working knowledge of warehouses and lakes. You get grain and joins right, run data-quality checks before trusting anything. You can take data end to end by yourself.",
+      "You build pipelines and orchestration that survive without you — scheduling, idempotency, monitoring, lineage, quality at scale. You handle access, governance, and cost.",
+      "You design platforms — streaming, very large scale, specialized infrastructure."
+    ],
+  },
+  {
+    id: "viz", type: "standard", label: "Visualization",
+    probe: "Have you built something genuinely compelling for a real problem?",
+    options: [
+      "Default charts, chart type chosen by habit or by whatever the library did.",
+      "You make correct, readable charts for real work — right form for the data type, labels, units, and scales that don't mislead.",
+      "You design for perception and cognitive load: signal in a channel that pops (position, color) rather than one that has to be searched (shape). You design for color-vision deficiency and contrast.",
+      "You build visual systems — dashboards and interactive tools that hold up in real use, consistent encodings across a family of views, tuned to audience and medium.",
+      "Original visual forms or tooling that others adopt; recognized design work."
+    ],
+  },
+  {
+    id: "comm", type: "standard", label: "Communication",
+    probe: "Could you stand up in front of executives and defend it?",
+    options: [
+      "You report results informally, to peers, in the order you did the work.",
+      "You present clearly to a friendly technical audience and write a summary people can read.",
+      "You present to non-technical stakeholders and executives: you lead with the decision, state uncertainty honestly, and take hard questions without over-claiming.",
+      "You build the case and the coalition — negotiating scope, bringing IT, security, and legal in as collaborators. You are the person sent into the difficult room.",
+      "You shape the conversation beyond your organization — invited talks, published work, external authority."
+    ],
+  },
+  {
+    id: "story", type: "standard", label: "Storytelling",
+    probe: "Could you explain something complex to a non-technical audience as a story?",
+    options: [
+      "You recite findings in the order you produced them.",
+      "You structure a narrative — setup, tension, resolution — for a report or a talk.",
+      "You make genuinely complex material intuitive for a lay audience through concrete story, analogy, and example, without falsifying it.",
+      "You build the narrative that carries an initiative — the framing other people repeat back to you unprompted. You teach it.",
+      "Recognized communicator; your framing becomes the shorthand others use."
+    ],
+  },
+  {
+    id: "domain", type: "standard", label: "Domain Knowledge",
+    probe: "Is there a field you actually know?",
+    options: [
+      "None. You would need someone to tell you what the columns mean.",
+      "You know one domain's vocabulary and main processes well enough to follow a subject-matter expert and ask reasonable questions.",
+      "You know a domain well enough to ask the right question, to spot a number that cannot be true, and to challenge a stakeholder's framing.",
+      "The domain's own experts treat you as a peer. You understand incentives, politics, and what the numbers do to the people they describe.",
+      "You are an expert in the domain in your own right, independently of the data science."
+    ],
+  },
+];
+
+// ---------------- state ----------------
+// Each axis walks a list of sub-steps that depends on its type and, for
+// standard/agents axes, on the main answer (the evidence gate — and for
+// agents, the currency question — are skipped once the main answer is 0,
+// since there's nothing to verify or nothing to decay).
+function stepsForAxis(axis, r) {
+  if (axis.type === "programming") return ["dialA", "dialB"];
+  if (r.base === 0) return ["main"];
+  if (axis.type === "agents") return ["main", "artifact", "failure", "currency"];
+  return ["main", "artifact", "failure"];
+}
+
+let axisIdx = 0;
+let subIdx = 0;
+let showResults = false;
+const history = [];
+const results = AXES.map(() => ({}));
+
+const host = document.getElementById("quizHost");
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
+
+function updateProgress() {
+  const total = AXES.length;
+  const done = showResults ? total : axisIdx;
+  progressFill.style.width = (100 * done / total).toFixed(1) + "%";
+  progressLabel.textContent = showResults
+    ? "Results"
+    : `Axis ${axisIdx + 1} of ${total}: ${AXES[axisIdx].label}`;
+}
+
+function currentQuestion() {
+  const axis = AXES[axisIdx];
+  const r = results[axisIdx];
+  const key = stepsForAxis(axis, r)[subIdx];
+  if (key === "main") {
+    return {
+      text: `${axis.label} — ${axis.probe}`,
+      choices: axis.options.map((text, lvl) => ({ label: text, value: lvl })),
+      answerKey: "base",
+    };
+  }
+  if (key === "dialA" || key === "dialB") {
+    const dial = axis[key];
+    return {
+      text: `${axis.label} — ${axis.probe}\n\n${dial.name}. ${dial.subtitle}`,
+      choices: dial.options.map((text, lvl) => ({ label: text, value: lvl })),
+      answerKey: key,
+    };
+  }
+  if (key === "artifact") {
+    return {
+      text: `For the level you just picked in ${axis.label}: can you name a specific artifact — a thing that exists and a person who used it (a repo, a dashboard someone opens, a talk with an audience)?`,
+      choices: [{ label: "Yes, I can name one", value: true }, { label: "No", value: false }],
+      answerKey: "artifact",
+    };
+  }
+  if (key === "failure") {
+    return {
+      text: `Still on ${axis.label}: can you describe how work at that level characteristically fails, and a specific time you caught it?`,
+      choices: [{ label: "Yes, I can describe one", value: true }, { label: "No", value: false }],
+      answerKey: "failure",
+    };
+  }
+  // currency (AI Agents only)
+  return {
+    text: `Last one on ${axis.label}: how long since your last sustained hands-on stretch with current agent tooling? (Standards here turn over fast — this axis is the one exception that decays with time.)`,
+    choices: axis.currencyChoices.map(c => ({ label: c.label, value: c.decay })),
+    answerKey: "currencyDecay",
+  };
+}
+
+function render() {
+  updateProgress();
+  host.innerHTML = "";
+  if (showResults) { renderResults(); return; }
+
+  const q = currentQuestion();
+  const r = results[axisIdx];
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<div class="q-title">${q.text.replace(/\n/g, "<br>")}</div><div class="options" id="options"></div>`;
+
+  const optionsHost = panel.querySelector("#options");
+  const current = r[q.answerKey];
+  q.choices.forEach((choice, i) => {
+    const row = document.createElement("label");
+    row.className = "option" + (current === choice.value ? " selected" : "");
+    row.innerHTML = `<input type="radio" name="choice" ${current === choice.value ? "checked" : ""}>
+      <span class="letter">${String.fromCharCode(65 + i)}.</span><span>${choice.label}</span>`;
+    row.addEventListener("click", () => { r[q.answerKey] = choice.value; render(); });
+    optionsHost.appendChild(row);
+  });
+
+  host.appendChild(panel);
+  host.appendChild(navBar(q));
+}
+
+function navBar(q) {
+  const bar = document.createElement("div");
+  bar.className = "nav";
+  const back = document.createElement("button");
+  back.textContent = "Back";
+  back.disabled = history.length === 0;
+  back.addEventListener("click", goBack);
+  const next = document.createElement("button");
+  next.className = "primary";
+  const steps = stepsForAxis(AXES[axisIdx], results[axisIdx]);
+  const isLast = axisIdx === AXES.length - 1 && subIdx === steps.length - 1;
+  next.textContent = isLast ? "See results" : "Next";
+  next.disabled = results[axisIdx][q.answerKey] === undefined;
+  next.addEventListener("click", goNext);
+  bar.appendChild(back);
+  bar.appendChild(next);
+  return bar;
+}
+
+function finalizeAxis(i) {
+  const axis = AXES[i];
+  const r = results[i];
+  if (axis.type === "programming") {
+    r.level = Math.round(2 * Math.min((r.dialA + r.dialB) / 2, r.dialB + 1)) / 2;
+    r.confidence = "n/a";
+    return;
+  }
+  let level = r.base;
+  if (r.base > 0 && (r.artifact === false || r.failure === false)) level -= 0.5;
+  r.preDecayLevel = level;
+  if (axis.type === "agents" && r.base > 0 && r.currencyDecay) {
+    let decayed = level - r.currencyDecay;
+    decayed = level >= 2 ? Math.max(decayed, 1) : Math.max(decayed, 0);
+    level = Math.round(decayed * 2) / 2;
+  }
+  r.level = level;
+  r.confidence = r.base === 0 ? "n/a" : (r.artifact && r.failure ? "evidenced" : "estimated");
+}
+
+function goNext() {
+  history.push({ axisIdx, subIdx });
+  const steps = stepsForAxis(AXES[axisIdx], results[axisIdx]);
+  if (subIdx === steps.length - 1) {
+    finalizeAxis(axisIdx);
+    advanceAxis();
+  } else {
+    subIdx++;
+  }
+  render();
+}
+
+function advanceAxis() {
+  axisIdx++;
+  subIdx = 0;
+  if (axisIdx >= AXES.length) showResults = true;
+}
+
+function goBack() {
+  if (history.length === 0) return;
+  const prev = history.pop();
+  axisIdx = prev.axisIdx;
+  subIdx = prev.subIdx;
+  showResults = false;
+  render();
+}
+
+// ---------------- results (portrait: archetype match, copy values, YAML export) ----------------
+// Archetype vectors from skill-level-rubric.md §6, in the explorer's SKILLS order:
+// [stats, aifound, agents, prog, dataeng, viz, comm, story, domain]
+const ARCHETYPES = {
+  "Balanced 2026 DS": [3, 3, 3, 2, 2, 3, 3, 3, 2],
+  "The Guide":        [2, 2, 3, 1, 1, 4, 4, 4, 2],
+  "The Builder":      [3, 2, 3, 3, 3, 2, 2, 3, 2],
+  "The Architect":    [2, 3, 3, 4, 4, 2, 2, 2, 3],
+  "The Visionary":    [3, 4, 4, 2, 2, 2, 3, 3, 4],
+  "The Toolmaker":    [2, 4, 4, 3, 2, 2, 2, 1, 2],
+};
+
+function nearestArchetype(vec) {
+  let best = null, bestDiff = Infinity;
+  for (const [name, v] of Object.entries(ARCHETYPES)) {
+    const diff = v.reduce((sum, x, i) => sum + Math.abs(x - vec[i]), 0) / v.length;
+    if (diff < bestDiff) { bestDiff = diff; best = name; }
+  }
+  return { name: best, diff: bestDiff };
+}
+
+function renderResults() {
+  const vec = AXES.map((axis, i) => results[i].level);
+  const nearest = nearestArchetype(vec);
+  const progIdx = AXES.findIndex(a => a.id === "prog");
+  const progResult = results[progIdx];
+
+  const rows = AXES.map((axis, i) => {
+    const r = results[i];
+    let scoreCell = String(r.level);
+    if (axis.type === "agents" && r.currencyDecay) {
+      scoreCell += ` <span style="color:var(--text-muted)">(pre-decay ${r.preDecayLevel}, currency −${r.currencyDecay})</span>`;
+    }
+    if (axis.type === "programming") {
+      scoreCell += ` <span style="color:var(--text-muted)">(A=${r.dialA}, B=${r.dialB}: min(mean, B+1))</span>`;
+    }
+    const confClass = r.confidence === "evidenced" ? "conf-evidenced" : r.confidence === "estimated" ? "conf-estimated" : "";
+    return `<tr><td>${axis.label}</td><td>${scoreCell}</td><td class="${confClass}">${r.confidence}</td></tr>`;
+  }).join("");
+
+  const copyText = AXES.map((axis, i) => `${axis.label}: ${results[i].level}`).join("\n");
+
+  const portraitYaml = `portrait:
+  name:
+  date: ${new Date().toISOString().slice(0, 10)}
+  context:
+  scores:
+${AXES.map((axis, i) => `    ${axis.id}: ${results[i].level}`).join("\n")}
+  programming_dials:
+    agentic: ${progResult.dialA}
+    unaided: ${progResult.dialB}
+  confidence:
+${AXES.map((axis, i) => `    ${axis.id}: ${results[i].confidence}`).join("\n")}
+  nearest_archetype: ${nearest.name} (mean diff ${nearest.diff.toFixed(2)})
+  target:
+  fast_gaps:
+  slow_gaps:
+  preference:
+  next_three_moves:
+`;
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `
+    <div class="q-title">Your portrait</div>
+    <table class="result-table">
+      <thead><tr><th>Axis</th><th>Score</th><th>Confidence</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="note"><b>Nearest archetype:</b> ${nearest.name}
+      (mean difference ${nearest.diff.toFixed(2)}${nearest.diff > 1 ? " — you're your own shape" : ""})</div>
+    <div class="toolbar">
+      <button id="copyBtn">Copy values (for the explorer sliders)</button>
+      <button id="downloadBtn">Download portrait.yaml</button>
+      <button id="restartBtn">Start over</button>
+    </div>
+    <pre>${copyText}</pre>
+    <div class="note">Paste these into the <a href="ds-skills-explorer.html">explorer</a> sliders to plot your radar,
+    or open <code>portrait.yaml</code> and fill in the reflection fields per the rubric's §6.</div>
+  `;
+  host.appendChild(panel);
+
+  panel.querySelector("#copyBtn").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(copyText); } catch (e) { /* clipboard unavailable */ }
+  });
+  panel.querySelector("#downloadBtn").addEventListener("click", () => {
+    const blob = new Blob([portraitYaml], { type: "text/yaml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "portrait.yaml";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  panel.querySelector("#restartBtn").addEventListener("click", () => {
+    axisIdx = 0; subIdx = 0; showResults = false; history.length = 0;
+    results.forEach(r => { for (const k in r) delete r[k]; });
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>
