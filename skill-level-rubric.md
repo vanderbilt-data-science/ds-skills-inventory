@@ -81,6 +81,18 @@ is at 4. If you have three or more 4s, re-read the artifact rule.
 Each ladder gives the probe question, the rungs, the evidence that counts, and
 the miscalibration people actually make on that axis.
 
+**Sub-skills and the averaging rule.** Some of these axes are broad enough that
+two people can land on the same number for different reasons — one strong on
+half the axis and weak on the rest, one steady across all of it. To keep that
+distinction visible, each axis lists **2–3 sub-skills**, named below it. Score
+each sub-skill on the same 0–4 ladder (apply the artifact rule and the
+failure-mode rule to each one individually), then the **axis score is the mean
+of its sub-skills**. This is also how the [explorer](ds-skills-explorer.html)
+computes the value it plots: sub-skill sliders underneath each axis, the radar
+vertex is their average. Programming is the one exception — its two sub-skills
+are Dial A and Dial B from §4's existing formula, not an unweighted mean, so
+the verification cap still applies exactly as before.
+
 ---
 
 ### Statistics & Modeling
@@ -88,6 +100,9 @@ the miscalibration people actually make on that axis.
 > **Probe:** *One course, two, or beyond into Bayesian? Can you build the model
 > that holds everything else equal — so you can answer whether the campaign
 > worked once seasonality and the acquisition are factored out?*
+
+**Sub-skills:** Inferential Stats & Regression · Experimental & Causal Design ·
+Bayesian Reasoning. Score each against the ladder below; axis score is the mean.
 
 | Level | You are here when |
 |---|---|
@@ -112,6 +127,10 @@ you can defend one. This is a **slow axis** — it moves by study, not by toolin
 
 > **Probe:** *Could you explain a transformer to someone — and name a decision
 > you would make differently because of what you understand?*
+
+**Sub-skills:** Applied Model Use & Mechanism · Method Selection & Evaluation ·
+Responsible AI & Model Risk. Score each against the ladder below; axis score is
+the mean.
 
 | Level | You are here when |
 |---|---|
@@ -139,6 +158,10 @@ core technical act**, and it is not a separate spoke.
 
 This is the axis that never finishes, and the one where the rungs move under you.
 Score the **practices**, not the product names.
+
+**Sub-skills:** Delegation & Specification Writing · Tool Use, Retrieval & Agent
+Skills · Multi-Agent Orchestration & Guardrails. Score each against the ladder
+below; axis score is the mean.
 
 | Level | You are here when |
 |---|---|
@@ -180,6 +203,9 @@ Programming is at a pivot point, so it is scored on **two dials** and combined.
 The act that never changed is *thinking about how to solve the problem and
 knowing when the answer is correct*; what changed is the altitude at which you do
 it.
+
+**Sub-skills:** Agentic Delivery (Dial A) · Unaided Fluency (Dial B). Unlike the
+other eight axes, these don't average unweighted — see the formula below.
 
 **Dial A — Agentic delivery.** What you can get built and shipped by directing
 agents.
@@ -230,6 +256,10 @@ Absorbs SQL and data access. "Garbage in, garbage out" no longer holds the way i
 did — unstructured and even dirty data can now be put to work — so the axis
 forked: you do this **for ML solutions** and, differently, **for AI solutions.**
 
+**Sub-skills:** Data Access & Extraction · Grain, Joins & Data Quality ·
+Pipelines & Platform Engineering. Score each against the ladder below; axis
+score is the mean.
+
 | Level | You are here when |
 |---|---|
 | **0** | No hands-on data access experience. Someone hands you a file. |
@@ -257,6 +287,10 @@ fit, and it belongs in your portrait (§6) rather than in this number.
 
 > **Probe:** *Have you built something genuinely compelling for a real problem?*
 
+**Sub-skills:** Chart Craft & Correctness · Perceptual & Cognitive Design ·
+Visual Systems & Dashboards. Score each against the ladder below; axis score is
+the mean.
+
 | Level | You are here when |
 |---|---|
 | **0** | Default charts, chart type chosen by habit or by whatever the library did. |
@@ -276,6 +310,10 @@ it moves by study of perception and by real audiences.
 ### Communication
 
 > **Probe:** *Could you stand up in front of executives and defend it?*
+
+**Sub-skills:** Technical Presentation · Executive & Stakeholder Communication ·
+Coalition Building & Adoption. Score each against the ladder below; axis score
+is the mean.
 
 | Level | You are here when |
 |---|---|
@@ -299,6 +337,10 @@ practice means security and IT, early and as partners.
 > **Probe:** *Could you explain something complex to a non-technical audience as
 > a story?*
 
+**Sub-skills:** Narrative Structure · Audience Adaptation & Analogy ·
+Organizational Narrative Leadership. Score each against the ladder below; axis
+score is the mean.
+
 | Level | You are here when |
 |---|---|
 | **0** | You recite findings in the order you produced them. |
@@ -320,6 +362,10 @@ the problem. **Slowest axis on the wheel.**
 ### Domain Knowledge
 
 > **Probe:** *Is there a field you actually know?*
+
+**Sub-skills:** Vocabulary & Process Fluency · Critical Judgment & Framing ·
+Peer-Level Expertise & Regulatory Depth. Score each against the ladder below;
+axis score is the mean.
 
 | Level | You are here when |
 |---|---|
@@ -454,7 +500,7 @@ portrait:
   name:
   date: 2026-08-12
   context:            # role, organization maturity stage (1-5), what you're aiming at
-  scores:             # 0-4, half steps, post-adjustment
+  scores:             # 0-4, half steps, post-adjustment - the mean of each axis's sub-skills
     stats:
     aifound:
     agents:
@@ -464,7 +510,17 @@ portrait:
     comm:
     story:
     domain:
-  programming_dials:  # before the verification cap
+  sub_scores:         # optional - the sub-skill numbers behind each mean above (§3);
+                       # skip an axis here once its sub-skills stop being lumpy
+    stats: {infer:, causal:, bayes:}
+    aifound: {applied:, select:, respons:}
+    agents: {delegate:, tooluse:, orchestr:}
+    dataeng: {access:, quality:, pipeline:}
+    viz: {craft:, percept:, systems:}
+    comm: {tech:, exec:, coalit:}
+    story: {narr:, adapt:, lead:}
+    domain: {vocab:, judge:, peer:}
+  programming_dials:  # before the verification cap - prog's own two sub-skills
     agentic:
     unaided:
   evidence:           # one named artifact per axis - the artifact rule, written down
@@ -484,11 +540,13 @@ Appropriately for the axis this revision added, the assessment itself is a good
 delegation. Point an agent at this repository and have it interview you:
 
 > Read `skill-level-rubric.md` and `skills-assessment.md`. Interview me one axis
-> at a time. For each, ask the probe question, then push for the specific
-> artifact and the specific failure I caught — do not accept a level until I have
-> named both, and drop me half a step when I can't. Apply the verification cap
-> and the currency decay yourself. Then fill in the portrait template, compute my
-> nearest archetype, and tell me which gap you'd close first and why.
+> at a time, sub-skill by sub-skill. For each sub-skill, ask the probe question,
+> then push for the specific artifact and the specific failure I caught — do not
+> accept a level until I have named both, and drop me half a step when I can't.
+> Average the sub-skills into the axis score yourself (Programming uses its own
+> two-dial formula, not a plain mean). Apply the verification cap and the
+> currency decay. Then fill in the portrait template, compute my nearest
+> archetype, and tell me which gap you'd close first and why.
 
 Have it read your CV, your repositories, and your project history first if you
 want the evidence probes to have teeth. An agent that has seen your commits is a

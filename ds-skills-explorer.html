@@ -83,9 +83,18 @@
     display: flex; align-items: center; gap: 7px; margin-bottom: 8px;
   }
   .cluster h3 .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .skill-row { display: grid; grid-template-columns: 1fr 120px 26px; gap: 8px; align-items: center; margin-bottom: 6px; }
-  .skill-row .name { font-size: 13px; }
-  .skill-row .val { font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .skill-block { margin-bottom: 10px; }
+  .skill-header {
+    display: grid; grid-template-columns: 1fr 120px 26px; gap: 8px; align-items: center;
+    margin-bottom: 4px;
+  }
+  .skill-header .name { font-size: 13px; font-weight: 600; }
+  .skill-header .val { font-size: 13px; font-weight: 600; text-align: right;
+    font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .subskills { padding-left: 12px; border-left: 2px solid var(--grid); margin-left: 2px; }
+  .subskill-row { display: grid; grid-template-columns: 1fr 120px 26px; gap: 8px; align-items: center; margin-bottom: 5px; }
+  .subskill-row .name { font-size: 11.5px; color: var(--text-secondary); }
+  .subskill-row .val { font-size: 11.5px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-muted); }
   .badge {
     display: inline-block; font-size: 9.5px; font-weight: 700;
     background: var(--badge-bg); color: var(--badge-fg);
@@ -136,7 +145,7 @@
       <svg id="chart" viewBox="0 0 1120 700" role="img" aria-label="Radar chart of skill levels"></svg>
       <div class="legend" id="legend"></div>
       <div class="tooltip" id="tooltip"></div>
-      <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Values are also listed beside each slider.</div>
+      <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Each axis breaks into 2&ndash;3 sub-skills &mdash; score those, and the axis value plotted on the radar is their average (Programming keeps its existing two-dial verification-cap formula). Values are also listed beside each slider.</div>
     </div>
   </div>
 </div>
@@ -150,15 +159,59 @@ const CLUSTERS = [
   { name: "Human interface", varName: "--c-human" },
 ];
 const SKILLS = [ // order = clockwise from top
-  { id: "stats",   label: "Statistics & Modeling",   cluster: 0, isNew: false },
-  { id: "aifound", label: "AI Foundations",           cluster: 1, isNew: false }, // absorbs the old ML/DL axis; evaluation lives in its rungs
-  { id: "agents",  label: "AI Agents & Frameworks",   cluster: 1, isNew: true },
-  { id: "prog",    label: "Programming",              cluster: 2, isNew: false },
-  { id: "dataeng", label: "Data Engineering",         cluster: 2, isNew: false }, // absorbs SQL & data access
-  { id: "viz",     label: "Visualization",            cluster: 3, isNew: false },
-  { id: "comm",    label: "Communication",            cluster: 3, isNew: false },
-  { id: "story",   label: "Storytelling",             cluster: 3, isNew: false },
-  { id: "domain",  label: "Domain Knowledge",         cluster: 3, isNew: false },
+  { id: "stats",   label: "Statistics & Modeling",   cluster: 0, isNew: false,
+    subSkills: [
+      { id: "infer",  label: "Inferential Stats & Regression" },
+      { id: "causal", label: "Experimental & Causal Design" },
+      { id: "bayes",  label: "Bayesian Reasoning" },
+    ] },
+  { id: "aifound", label: "AI Foundations",           cluster: 1, isNew: false, // absorbs the old ML/DL axis; evaluation lives in its rungs
+    subSkills: [
+      { id: "applied", label: "Applied Model Use & Mechanism" },
+      { id: "select",  label: "Method Selection & Evaluation" },
+      { id: "respons", label: "Responsible AI & Model Risk" },
+    ] },
+  { id: "agents",  label: "AI Agents & Frameworks",   cluster: 1, isNew: true,
+    subSkills: [
+      { id: "delegate", label: "Delegation & Specification Writing" },
+      { id: "tooluse",  label: "Tool Use, Retrieval & Agent Skills" },
+      { id: "orchestr", label: "Multi-Agent Orchestration & Guardrails" },
+    ] },
+  { id: "prog",    label: "Programming",              cluster: 2, isNew: false,
+    subSkills: [
+      { id: "agentic", label: "Agentic Delivery (Dial A)" },
+      { id: "unaided", label: "Unaided Fluency (Dial B)" },
+    ] },
+  { id: "dataeng", label: "Data Engineering",         cluster: 2, isNew: false, // absorbs SQL & data access
+    subSkills: [
+      { id: "access",   label: "Data Access & Extraction" },
+      { id: "quality",  label: "Grain, Joins & Data Quality" },
+      { id: "pipeline", label: "Pipelines & Platform Engineering" },
+    ] },
+  { id: "viz",     label: "Visualization",            cluster: 3, isNew: false,
+    subSkills: [
+      { id: "craft",    label: "Chart Craft & Correctness" },
+      { id: "percept",  label: "Perceptual & Cognitive Design" },
+      { id: "systems",  label: "Visual Systems & Dashboards" },
+    ] },
+  { id: "comm",    label: "Communication",            cluster: 3, isNew: false,
+    subSkills: [
+      { id: "tech",   label: "Technical Presentation" },
+      { id: "exec",   label: "Executive & Stakeholder Communication" },
+      { id: "coalit", label: "Coalition Building & Adoption" },
+    ] },
+  { id: "story",   label: "Storytelling",             cluster: 3, isNew: false,
+    subSkills: [
+      { id: "narr",   label: "Narrative Structure" },
+      { id: "adapt",  label: "Audience Adaptation & Analogy" },
+      { id: "lead",   label: "Organizational Narrative Leadership" },
+    ] },
+  { id: "domain",  label: "Domain Knowledge",         cluster: 3, isNew: false,
+    subSkills: [
+      { id: "vocab",  label: "Vocabulary & Process Fluency" },
+      { id: "judge",  label: "Critical Judgment & Framing" },
+      { id: "peer",   label: "Peer-Level Expertise & Regulatory Depth" },
+    ] },
 ];
 // preset values follow SKILLS order:
 // [stats, aifound, agents, prog, dataeng, viz, comm, story, domain]
@@ -172,7 +225,32 @@ const PRESETS = {
   "The Toolmaker":   [2, 4, 4, 3, 2, 2, 2, 1, 2],
 };
 const N = SKILLS.length, CX = 545, CY = 360, R = 235, MAXV = 4;
-let values = PRESETS["Balanced 2026 DS"].slice();
+
+// Each axis is broken into 2-3 sub-skills, scored independently 0-4; the axis
+// value plotted on the radar is the average of its sub-skills (Programming
+// keeps its existing two-dial verification-cap formula instead of a plain
+// mean, since sub-skills there are Dial A / Dial B, not additive facets).
+let subValues = {};   // { [skillId]: number[] }, one entry per sub-skill
+let values = [];      // computed axis-level averages, one per SKILLS entry
+
+function computeAxisValue(skill) {
+  const subs = subValues[skill.id];
+  if (skill.id === "prog") {
+    const [a, b] = subs;
+    return Math.min((a + b) / 2, b + 1);
+  }
+  return subs.reduce((s, v) => s + v, 0) / subs.length;
+}
+function recomputeValues() {
+  values = SKILLS.map(computeAxisValue);
+}
+function setSubValuesFromAxis(axisValues) {
+  SKILLS.forEach((s, si) => {
+    subValues[s.id] = s.subSkills.map(() => axisValues[si]);
+  });
+  recomputeValues();
+}
+const fmtAxis = v => v.toFixed(1);
 
 // ---------------- helpers ----------------
 const svgNS = "http://www.w3.org/2000/svg";
@@ -186,9 +264,12 @@ const el = (tag, attrs, parent) => {
   return e;
 };
 
+setSubValuesFromAxis(PRESETS["Balanced 2026 DS"]);
+
 // ---------------- sliders ----------------
 const slidersHost = document.getElementById("sliders");
 function buildSliders() {
+  slidersHost.innerHTML = "";
   CLUSTERS.forEach((c, ci) => {
     const div = document.createElement("div");
     div.className = "cluster";
@@ -197,25 +278,43 @@ function buildSliders() {
     div.appendChild(h);
     SKILLS.forEach((s, si) => {
       if (s.cluster !== ci) return;
-      const row = document.createElement("div");
-      row.className = "skill-row";
-      row.innerHTML =
+      const block = document.createElement("div");
+      block.className = "skill-block";
+      const header = document.createElement("div");
+      header.className = "skill-header";
+      header.innerHTML =
         `<span class="name">${s.label}${s.isNew ? '<span class="badge">NEW</span>' : ''}</span>` +
-        `<input type="range" min="0" max="4" step="0.5" value="${values[si]}" data-idx="${si}" aria-label="${s.label}">` +
-        `<span class="val" id="val-${si}">${values[si]}</span>`;
-      div.appendChild(row);
+        `<span></span>` +
+        `<span class="val" id="val-${si}">${fmtAxis(values[si])}</span>`;
+      block.appendChild(header);
+      const subHost = document.createElement("div");
+      subHost.className = "subskills";
+      s.subSkills.forEach((sub, sj) => {
+        const row = document.createElement("div");
+        row.className = "subskill-row";
+        const v = subValues[s.id][sj];
+        row.innerHTML =
+          `<span class="name">${sub.label}</span>` +
+          `<input type="range" min="0" max="4" step="0.5" value="${v}" data-axis-idx="${si}" data-sub-idx="${sj}" aria-label="${s.label}: ${sub.label}">` +
+          `<span class="val" id="val-${si}-${sj}">${v}</span>`;
+        subHost.appendChild(row);
+      });
+      block.appendChild(subHost);
+      div.appendChild(block);
     });
     slidersHost.appendChild(div);
   });
-  slidersHost.addEventListener("input", e => {
-    if (e.target.type !== "range") return;
-    const i = +e.target.dataset.idx;
-    values[i] = +e.target.value;
-    document.getElementById("val-" + i).textContent = values[i];
-    document.getElementById("preset").value = "Custom";
-    draw();
-  });
 }
+slidersHost.addEventListener("input", e => {
+  if (e.target.type !== "range") return;
+  const si = +e.target.dataset.axisIdx, sj = +e.target.dataset.subIdx;
+  subValues[SKILLS[si].id][sj] = +e.target.value;
+  document.getElementById(`val-${si}-${sj}`).textContent = subValues[SKILLS[si].id][sj];
+  values[si] = computeAxisValue(SKILLS[si]);
+  document.getElementById("val-" + si).textContent = fmtAxis(values[si]);
+  document.getElementById("preset").value = "Custom";
+  draw();
+});
 
 // ---------------- chart ----------------
 const svg = document.getElementById("chart");
@@ -295,7 +394,7 @@ const tip = document.getElementById("tooltip");
 function showTip(ev, i) {
   const host = svg.parentElement.getBoundingClientRect();
   tip.style.display = "block";
-  let html = `<span class="t-name">${SKILLS[i].label}</span> <span class="t-val">${values[i]} / 4</span>`;
+  let html = `<span class="t-name">${SKILLS[i].label}</span> <span class="t-val">${fmtAxis(values[i])} / 4</span>`;
   if (compareValues) html += `<br><span class="t-val">vs ${compareValues[i]} / 4</span>`;
   tip.innerHTML = html;
   tip.style.left = (ev.clientX - host.left + 14) + "px";
@@ -317,11 +416,8 @@ presetSel.value = "Balanced 2026 DS";
 presetSel.addEventListener("change", () => {
   const p = PRESETS[presetSel.value];
   if (!p) return;
-  values = p.slice();
-  document.querySelectorAll('#sliders input[type="range"]').forEach(sl => {
-    sl.value = values[+sl.dataset.idx];
-    document.getElementById("val-" + sl.dataset.idx).textContent = values[+sl.dataset.idx];
-  });
+  setSubValuesFromAxis(p);
+  buildSliders();
   if (presetSel.value !== "Custom") {
     const nameBox = document.getElementById("portraitName");
     if (!nameBox.dataset.userEdited) nameBox.value = presetSel.value;
@@ -375,7 +471,10 @@ document.getElementById("downloadPng").addEventListener("click", () => {
   img.src = url;
 });
 document.getElementById("copyValues").addEventListener("click", async () => {
-  const text = SKILLS.map((s, i) => `${s.label}: ${values[i]}`).join("\n");
+  const text = SKILLS.map((s, i) => {
+    const subLines = s.subSkills.map((sub, j) => `    ${sub.label}: ${subValues[s.id][j]}`).join("\n");
+    return `${s.label}: ${fmtAxis(values[i])}\n${subLines}`;
+  }).join("\n");
   try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
 });
 

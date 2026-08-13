@@ -217,9 +217,15 @@ Open the [live version](https://vanderbilt-data-science.github.io/ds-skills-inve
 or download `ds-skills-explorer.html` and open it locally — it's one file with no
 dependencies, so it works offline and off a USB stick.
 
-- **Sliders are the input, the radar is the output.** Nine sliders, 0–4 in 0.5
+- **Sliders are the input, the radar is the output.** Nine axes, 0–4 in 0.5
   steps, grouped under the same cluster headings as the chart, with the numeric
   value always visible — you never have to decode the chart to read a value.
+- **Sub-skills, not one number per axis.** Broad axes are genuinely broad —
+  someone strong on half of Data Engineering and weak on the rest shouldn't
+  read the same as someone steady across it. Each axis breaks into 2–3
+  sub-skills with their own sliders; the radar plots their average (Programming
+  keeps its existing two-dial verification-cap formula). See
+  [`skill-level-rubric.md`](skill-level-rubric.md) §3 for the full breakdown.
 - **Presets** load any archetype in one click. Touching a slider flips the
   selector to "Custom", so a preset never silently misdescribes what's shown.
 - **Comparison** overlays a second profile as a dashed, unfilled polygon — your
