@@ -229,7 +229,10 @@ function loadHistory() {
     return Array.isArray(raw) ? raw : [];
   } catch (e) { return []; }
 }
-function persistHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+function persistHistory() {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+  catch (e) { /* storage unavailable (private mode, sandboxed preview, quota) — keep working in-memory for this session */ }
+}
 function historySorted() { return history.slice().sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)); }
 let history = loadHistory();
 let compareLabel = null;
