@@ -502,9 +502,17 @@ much harder grader than you are.
 - **After any project that ended badly.** That is when the gaps are legible and
   the artifact rule is easy to apply.
 
-The explorer deliberately has no backend. Recording each assessment with a
-timestamp and playing your profile back as a movie over a program is left as an
-exercise — and it is, appropriately, an exercise on the axis this revision added.
+The explorer still has no backend — attempts are saved to your browser's
+`localStorage`, not a server — but it now does the recording and playback for
+you. Click **Save current as attempt** each time you re-run the wheel; the
+**Compare with** dropdown can then overlay any past attempt, not just an
+archetype, and **Play growth** morphs your polygon across every saved attempt
+in sequence. **Download animated SVG** exports that morph as a standalone,
+shareable file once you have two or more attempts saved. Since it's
+browser-local, use **Export history (.json)** before switching machines or
+browsers, and **Import history (.json)** to bring it back — that's also how a
+cohort could pool anonymized attempts, appropriately an exercise on the axis
+this revision added.
 
 ---
 
