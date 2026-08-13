@@ -4,7 +4,7 @@ A refreshed skills inventory for data scientists, updating the *Data Science in
 Practice* framework for the era of generative AI and AI agents — plus an
 interactive radar-chart explorer for plotting individual and team profiles.
 
-**▶ [Open the interactive explorer](https://vanderbilt-data-science.github.io/ds-skills-inventory/ds-skills-explorer.html)** — set nine sliders, load an archetype, overlay a comparison, export SVG or PNG.
+**▶ [Open the interactive explorer](https://vanderbilt-data-science.github.io/ds-skills-inventory/ds-skills-explorer.html)** — set nine sliders, load an archetype, overlay a comparison, export SVG or PNG. The comparison dropdown also includes **Job Market** presets (Data Scientist, ML Engineer, Data Analyst, AI Engineer) sourced from 2026 US labor-market reporting — see [`job-market-demand.md`](job-market-demand.md) for methodology and sources.
 
 ![Skills radar](ds-skills-radar.svg)
 
@@ -82,7 +82,9 @@ Every axis is scored **0–4**, from coursework-only to frontier-advancing. The
 reasoning behind the changed axes is in
 [`skills-assessment.md`](skills-assessment.md); the rung-by-rung rating rubric
 for all nine — with evidence anchors, calibration rules, and the self-assessment
-procedure — is in [`skill-level-rubric.md`](skill-level-rubric.md).
+procedure — is in [`skill-level-rubric.md`](skill-level-rubric.md). How the
+axes map to current US job-market demand, by role, is in
+[`job-market-demand.md`](job-market-demand.md).
 
 ### Notes on the axes that moved
 
