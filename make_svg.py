@@ -39,16 +39,16 @@ def esc(s):
 
 out = []
 out.append('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 960" font-family="system-ui, -apple-system, \'Segoe UI\', sans-serif">')
-out.append("""<!--
+out.append(f"""<!--
   Data Scientist Skills Inventory (2026) - editable radar
   HOW TO EDIT:
   * Skill values: edit the single <polygon id="profile"> points list below.
-    Each vertex i sits at radius value/4 * 280 from center (520,440), angle
-    -90deg + i*(360/9)deg clockwise, in the axis order listed in <g id="axes">.
+    Each vertex i sits at radius value/4 * {fmt(R)} from center ({fmt(CX)},{fmt(CY)}),
+    angle -90deg + i*(360/{N})deg clockwise, in the axis order listed in <g id="axes">.
     Easiest: regenerate with make_svg.py after changing values there.
   * Labels: plain <text> elements in <g id="labels">.
   * Colors: search-and-replace the hex values; cluster arcs use
-    #2a78d6 / #eb6834 / #1baf7a / #eda100.
+    {" / ".join(color for _, _, _, color in CLUSTERS)}.
   * Delete <g id="cluster-arcs"> or <g id="new-badges"> if not wanted.
 -->""")
 out.append(f'<rect width="1360" height="960" fill="#fcfcfb"/>')
@@ -56,7 +56,7 @@ out.append(f'<rect width="1360" height="960" fill="#fcfcfb"/>')
 # title
 out.append('<g id="title">')
 out.append(f'<text x="680" y="56" text-anchor="middle" font-size="32" font-weight="700" fill="#0b0b0b">Data Scientist Skills Inventory</text>')
-out.append(f'<text x="680" y="86" text-anchor="middle" font-size="18" fill="#52514e">2026 revision — 9 axes, scale 0–4</text>')
+out.append(f'<text x="680" y="86" text-anchor="middle" font-size="18" fill="#52514e">2026 revision — {N} axes, scale 0–4</text>')
 out.append('</g>')
 
 # rings

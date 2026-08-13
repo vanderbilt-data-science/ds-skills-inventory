@@ -3,8 +3,8 @@
   Data Scientist Skills Inventory (2026) - editable radar
   HOW TO EDIT:
   * Skill values: edit the single <polygon id="profile"> points list below.
-    Each vertex i sits at radius value/4 * 280 from center (520,440), angle
-    -90deg + i*(360/9)deg clockwise, in the axis order listed in <g id="axes">.
+    Each vertex i sits at radius value/4 * 280 from center (680,490),
+    angle -90deg + i*(360/9)deg clockwise, in the axis order listed in <g id="axes">.
     Easiest: regenerate with make_svg.py after changing values there.
   * Labels: plain <text> elements in <g id="labels">.
   * Colors: search-and-replace the hex values; cluster arcs use
