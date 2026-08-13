@@ -106,6 +106,20 @@
   .tooltip .t-name { font-weight: 600; }
   .tooltip .t-val { color: var(--text-secondary); }
   .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .notes-panel { margin-top: 20px; }
+  .notes-header { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .notes-header h3 {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-secondary);
+  }
+  .notes-header p { font-size: 12px; color: var(--text-muted); }
+  .notes-status { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  #notes {
+    width: 100%; min-height: 110px; resize: vertical;
+    font: inherit; font-size: 13.5px; line-height: 1.5;
+    background: var(--page); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+  }
 </style>
 </head>
 <body class="viz-root">
@@ -138,6 +152,15 @@
       <div class="tooltip" id="tooltip"></div>
       <div class="footnote">NEW marks the axis added in the 2026 revision (AI-agent era). AI Foundations absorbs the old ML/DL axis (evaluation is baked into its rungs); Data Engineering absorbs SQL &amp; data access. Values are also listed beside each slider.</div>
     </div>
+  </div>
+
+  <div class="panel notes-panel">
+    <div class="notes-header">
+      <h3>Notes &amp; goals</h3>
+      <span class="notes-status" id="notesStatus"></span>
+    </div>
+    <p style="margin-bottom:8px;">Track your own progress here &mdash; what you want to improve next, why you picked a particular score, goals for next quarter. Saved automatically in this browser and included in &ldquo;Copy values&rdquo;.</p>
+    <textarea id="notes" placeholder="e.g. Storytelling: 2 because I've only presented to teammates, not execs. Goal: lead a client-facing readout next quarter."></textarea>
   </div>
 </div>
 
@@ -375,8 +398,28 @@ document.getElementById("downloadPng").addEventListener("click", () => {
   img.src = url;
 });
 document.getElementById("copyValues").addEventListener("click", async () => {
-  const text = SKILLS.map((s, i) => `${s.label}: ${values[i]}`).join("\n");
+  let text = SKILLS.map((s, i) => `${s.label}: ${values[i]}`).join("\n");
+  if (notesBox.value.trim()) text += `\n\nNotes:\n${notesBox.value.trim()}`;
   try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
+});
+
+// ---------------- notes ----------------
+const NOTES_KEY = "dsSkillsExplorerNotes";
+const notesBox = document.getElementById("notes");
+const notesStatus = document.getElementById("notesStatus");
+try {
+  notesBox.value = localStorage.getItem(NOTES_KEY) || "";
+} catch (e) { /* localStorage unavailable (private mode, file://, etc.) */ }
+let notesTimer = null;
+notesBox.addEventListener("input", () => {
+  clearTimeout(notesTimer);
+  notesStatus.textContent = "";
+  notesTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(NOTES_KEY, notesBox.value);
+      notesStatus.textContent = "Saved " + new Date().toLocaleTimeString();
+    } catch (e) { notesStatus.textContent = "Couldn't save (storage unavailable)"; }
+  }, 400);
 });
 
 // theme changes re-draw (colors are read from CSS at draw time)
