@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Scientist Skills Exam</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body.viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { color: var(--text-secondary); font-size: 13.5px; margin-top: 4px; }
+
+  .progress { margin: 18px 0 10px; }
+  .progress-bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--series-1); border-radius: 3px; transition: width .2s; }
+  .progress-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .panel {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px; margin-top: 8px;
+  }
+  .q-title { font-size: 15.5px; font-weight: 600; margin-bottom: 16px; line-height: 1.4; }
+  .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+  .option {
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; font-size: 13.5px; line-height: 1.45;
+  }
+  .option:hover { border-color: var(--text-muted); }
+  .option.selected { border-color: var(--series-1); background: rgba(42,120,214,0.08); }
+  .option input { margin-top: 3px; accent-color: var(--series-1); flex: none; }
+  .option .letter { font-weight: 700; flex: none; width: 16px; }
+
+  .nav { display: flex; justify-content: space-between; margin-top: 18px; }
+  button {
+    font: inherit; font-size: 13.5px; cursor: pointer;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px;
+  }
+  button:hover { border-color: var(--text-muted); }
+  button.primary { background: var(--series-1); color: #fff; border-color: var(--series-1); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Data Scientist Skills Exam</h1>
+    <p>A multiple-choice placement exam against the
+    <a href="skill-level-rubric.md">2026 skill-level rubric</a>. One question at a time.</p>
+  </header>
+
+  <div class="progress">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+
+  <div id="quizHost"></div>
+</div>
+
+<script>
+// ---------------- exam data (placeholder for now — full rubric content comes next commit) ----------------
+const QUESTIONS = [
+  {
+    id: "demo",
+    text: "Placeholder question — confirms the exam shell works before real content is added.",
+    choices: [
+      { label: "Option A", value: 0 },
+      { label: "Option B", value: 1 },
+      { label: "Option C", value: 2 },
+    ],
+  },
+];
+
+// ---------------- state ----------------
+let step = 0;
+const answers = QUESTIONS.map(() => undefined);
+
+const host = document.getElementById("quizHost");
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
+
+function updateProgress() {
+  const total = QUESTIONS.length;
+  const done = Math.min(step, total - 1);
+  progressFill.style.width = (100 * done / Math.max(total - 1, 1)).toFixed(1) + "%";
+  progressLabel.textContent = `Question ${Math.min(step + 1, total)} of ${total}`;
+}
+
+function render() {
+  updateProgress();
+  host.innerHTML = "";
+  const q = QUESTIONS[step];
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<div class="q-title">${q.text}</div><div class="options" id="options"></div>`;
+
+  const optionsHost = panel.querySelector("#options");
+  q.choices.forEach((choice, i) => {
+    const row = document.createElement("label");
+    row.className = "option" + (answers[step] === choice.value ? " selected" : "");
+    row.innerHTML = `<input type="radio" name="choice" value="${choice.value}" ${answers[step] === choice.value ? "checked" : ""}>
+      <span class="letter">${String.fromCharCode(65 + i)}.</span><span>${choice.label}</span>`;
+    row.addEventListener("click", () => { answers[step] = choice.value; render(); });
+    optionsHost.appendChild(row);
+  });
+
+  host.appendChild(panel);
+  host.appendChild(navBar());
+}
+
+function navBar() {
+  const bar = document.createElement("div");
+  bar.className = "nav";
+  const back = document.createElement("button");
+  back.textContent = "Back";
+  back.disabled = step === 0;
+  back.addEventListener("click", () => { step--; render(); });
+  const next = document.createElement("button");
+  next.className = "primary";
+  next.textContent = step === QUESTIONS.length - 1 ? "See results" : "Next";
+  next.disabled = answers[step] === undefined;
+  next.addEventListener("click", () => { step++; render(); });
+  bar.appendChild(back);
+  bar.appendChild(next);
+  return bar;
+}
+
+render();
+</script>
+</body>
+</html>
