@@ -14,9 +14,10 @@ applying them through conversation instead of a self-scored worksheet.
 
 ## Status
 
-All four sections are drafted and the results-page generator is
-smoke-tested. Not yet run through a real end-to-end interview — see issue
-#16 for progress.
+Run end-to-end once against a real interview (issue #16) — interview,
+scoring, archetype matching, and results page all worked as written,
+including the "your own shape" archetype fallback on an early-career
+profile where no preset was within 1.0 mean difference.
 
 ## 1. Interview flow
 
