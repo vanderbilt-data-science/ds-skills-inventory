@@ -106,6 +106,19 @@
   .tooltip .t-name { font-weight: 600; }
   .tooltip .t-val { color: var(--text-secondary); }
   .footnote { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+  .load-panel {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; margin: -8px 0 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .load-panel[hidden] { display: none; }
+  .load-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .load-row label { font-size: 12.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px; }
+  textarea#loadText {
+    font: inherit; font-size: 13px; background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; resize: vertical;
+  }
+  .load-status { font-size: 12.5px; color: var(--text-secondary); }
 </style>
 </head>
 <body class="viz-root">
@@ -128,6 +141,26 @@
     <button id="downloadSvg">Download SVG</button>
     <button id="downloadPng">Download PNG</button>
     <button id="copyValues">Copy values</button>
+    <button id="toggleLoad">Load values</button>
+  </div>
+
+  <div class="load-panel" id="loadPanel" hidden>
+    <div class="load-row">
+      <label>Target
+        <select id="loadTarget" aria-label="Load target">
+          <option value="base">Portrait (base profile)</option>
+          <option value="compare">Comparison overlay</option>
+        </select>
+      </label>
+      <label>Series name (comparison only)
+        <input type="text" id="loadName" placeholder="e.g. Senior Data Scientist posting">
+      </label>
+    </div>
+    <textarea id="loadText" rows="4" placeholder="Paste 'Label: value' lines, one per axis &mdash; matches the Copy values format and the job-posting-matcher skill's output"></textarea>
+    <div class="load-row">
+      <button id="applyLoad">Apply</button>
+      <span class="load-status" id="loadStatus"></span>
+    </div>
   </div>
 
   <div class="layout">
@@ -281,7 +314,8 @@ function draw() {
 
 function drawLegend() {
   const lg = document.getElementById("legend");
-  const compareName = document.getElementById("compare").value;
+  const compareSelEl = document.getElementById("compare");
+  const compareName = compareSelEl.options[compareSelEl.selectedIndex]?.text || compareSelEl.value;
   let html = `<span class="key"><span class="swatch" style="background:var(--series-1)"></span>` +
              `${document.getElementById("portraitName").value || "Data Scientist"}</span>`;
   if (compareValues) {
@@ -377,6 +411,62 @@ document.getElementById("downloadPng").addEventListener("click", () => {
 document.getElementById("copyValues").addEventListener("click", async () => {
   const text = SKILLS.map((s, i) => `${s.label}: ${values[i]}`).join("\n");
   try { await navigator.clipboard.writeText(text); } catch (e) { /* clipboard unavailable */ }
+});
+
+// ---------------- load values ----------------
+const loadPanel = document.getElementById("loadPanel");
+document.getElementById("toggleLoad").addEventListener("click", () => {
+  loadPanel.hidden = !loadPanel.hidden;
+});
+
+function parseValuesText(text) {
+  const byIdx = {};
+  text.split(/\r?\n/).forEach(line => {
+    const m = line.match(/^\s*([^:]+?)\s*:\s*([0-4](?:\.5)?)\s*$/);
+    if (!m) return;
+    const key = m[1].trim().toLowerCase();
+    const val = parseFloat(m[2]);
+    SKILLS.forEach((s, i) => {
+      if (key === s.label.toLowerCase() || key === s.id.toLowerCase()) byIdx[i] = val;
+    });
+  });
+  const out = new Array(N).fill(null);
+  let count = 0;
+  for (let i = 0; i < N; i++) {
+    if (byIdx[i] !== undefined) { out[i] = byIdx[i]; count++; }
+  }
+  return { values: out, count };
+}
+
+document.getElementById("applyLoad").addEventListener("click", () => {
+  const status = document.getElementById("loadStatus");
+  const { values: parsed, count } = parseValuesText(document.getElementById("loadText").value);
+  if (count < N) {
+    status.style.color = "var(--badge-fg)";
+    status.textContent = `Matched only ${count} of ${N} axes — check the "Label: value" format and axis names.`;
+    return;
+  }
+  const target = document.getElementById("loadTarget").value;
+  if (target === "base") {
+    values = parsed;
+    document.querySelectorAll('#sliders input[type="range"]').forEach(sl => {
+      sl.value = values[+sl.dataset.idx];
+      document.getElementById("val-" + sl.dataset.idx).textContent = values[+sl.dataset.idx];
+    });
+    presetSel.value = "Custom";
+    status.style.color = "var(--text-secondary)";
+    status.textContent = `Loaded ${count} values into the portrait.`;
+  } else {
+    compareValues = parsed;
+    const name = document.getElementById("loadName").value.trim() || "Custom";
+    let opt = compareSel.querySelector('option[value="Custom"]');
+    if (!opt) { opt = new Option(name, "Custom"); compareSel.add(opt); }
+    else { opt.textContent = name; }
+    compareSel.value = "Custom";
+    status.style.color = "var(--text-secondary)";
+    status.textContent = `Loaded ${count} values into the comparison overlay ("${name}").`;
+  }
+  draw();
 });
 
 // theme changes re-draw (colors are read from CSS at draw time)
