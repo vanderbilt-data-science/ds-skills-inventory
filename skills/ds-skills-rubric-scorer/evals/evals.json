@@ -1,0 +1,36 @@
+{
+  "skill_name": "ds-skills-rubric-scorer",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I'm Maria, a senior analyst at a mid-size healthtech company. Score me on the ds-skills-inventory Programming axis and AI Agents & Frameworks axis, then tell me my nearest archetype. For Programming: I've been directing Claude Code agents for the past year and shipped an internal patient-flow dashboard that's now in production, used daily by ops -- I designed the architecture, set up CI, and run three or four agents in parallel some days. But if you took the agent away, I can read Python well enough to modify a script, I only really know one language, and I've never had to debug something gnarly under pressure by hand. For AI Agents & Frameworks: I built two reusable Agent Skills for our data warehouse quirks that two teammates now use, connected Claude to our Snowflake via MCP, and every workflow I ship has an acceptance check built in -- I killed a runaway agent job last month that was about to write bad records. I've been doing this heavily for about 2 months. For the other seven axes, just use reasonable data-scientist-with-3-years-experience assumptions and interview me with the probe questions, making up plausible but clearly-labeled test answers as needed to complete the assessment. Today's date is 2026-08-13.",
+      "expected_output": "Programming scored from two separate dials (A~3 agentic delivery, B~1 unaided fluency), combined via min(mean(A,B), B+1) with the cap explicitly flagged as binding. AI Agents around 2, undecayed (activity is recent). A named nearest archetype from a full 9-axis vector.",
+      "files": [],
+      "assertions": [
+        {"text": "Reports Dial A (agentic delivery) and Dial B (unaided fluency) as two separate numbers with separate reasoning, not one merged Programming score", "id": "dials_separated"},
+        {"text": "States or applies the cap formula min(mean(A,B), B+1) for the Programming axis", "id": "cap_formula_used"},
+        {"text": "Explicitly says whether the verification cap is binding for this person and explains in plain language why", "id": "cap_binding_explained"},
+        {"text": "Final Programming axis score is between 1.5 and 2.5 inclusive", "id": "programming_score_range"},
+        {"text": "Final AI Agents & Frameworks score is between 1.5 and 2.5 inclusive", "id": "agents_score_range"},
+        {"text": "Does not apply currency decay to the AI Agents score (activity is current, well under the 6-month decay trigger)", "id": "no_spurious_decay"},
+        {"text": "Names one specific archetype as nearest, with a numeric distance or comparison", "id": "archetype_named"},
+        {"text": "Either shows scripts/score.py actually executed with its JSON output, or explicitly states no Python was available and flags numbers as unverified", "id": "script_run_or_flagged"}
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I'm Devon, I do data science for a logistics company at maturity Stage 2. Run the full 9-axis ds-skills-inventory rubric on me and give me the final portrait YAML plus my nearest archetype. Facts: I have a master's-level stats background, built and defended a causal analysis of a pricing change that leadership acted on, but I've never designed an experiment before collecting data. I can explain attention and embeddings and have run basic evals on a RAG system that's live, but haven't done responsible-AI work like bias or privacy review. For AI Agents -- I went hard on this in early 2025, built a Skill for our data warehouse that a teammate used, but I haven't touched any of it hands-on since around November 2025 because I moved to a stats-heavy project. For Programming -- one language deeply (Python), I'm the person people bring bugs to, but I've only recently started directing agents for small scripts. For Data Engineering, Visualization, Communication, Storytelling, and Domain Knowledge, make up plausible, clearly-labeled mid-level test answers with named artifacts so the interview can complete. Today's date is 2026-08-13.",
+      "expected_output": "All 9 axes scored. AI Agents shows both a raw (pre-decay) score and a decayed score (~9 months since Nov 2025 = one 6-month period = -0.5, floored at 1). Programming computed via the two-dial cap formula. A portrait YAML per the rubric's section 6 template, and a named nearest archetype.",
+      "files": [],
+      "assertions": [
+        {"text": "Gives a numeric 0-4 score for all nine axes", "id": "all_nine_scored"},
+        {"text": "Shows both a raw (pre-decay) AI Agents score and a separately-stated decayed score", "id": "agents_raw_and_decayed_shown"},
+        {"text": "The AI Agents decay corresponds to roughly one 6-month period (~-0.5 from raw) and does not drop below a floor of 1", "id": "decay_math_plausible"},
+        {"text": "Programming axis computed from two separate dials using min(mean(A,B),B+1) rather than a single averaged or eyeballed number", "id": "programming_cap_applied"},
+        {"text": "Output includes a 'portrait:' YAML block with at minimum scores, programming_dials, and nearest_archetype keys", "id": "portrait_yaml_present"},
+        {"text": "Names one specific archetype as nearest, with a numeric distance or comparison basis", "id": "archetype_named"},
+        {"text": "Either shows scripts/score.py actually executed with its JSON output, or explicitly states no Python was available and flags numbers as unverified", "id": "script_run_or_flagged"}
+      ]
+    }
+  ]
+}
